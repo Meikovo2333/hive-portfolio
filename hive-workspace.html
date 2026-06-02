@@ -1,0 +1,2877 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920">
+  <title>Hive — Workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.css" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════════
+       1. 设计 Token
+       ═══════════════════════════════════════════════ */
+    :root {
+      --bg-base: #121E1E;
+      --bg-card: #1A2A2A;
+      --bg-surface: #1E3232;
+      --bg-hover: #243838;
+
+      --accent: #3AC1B3;
+      --accent-dim: rgba(58, 193, 179, 0.12);
+      --accent-glow: rgba(58, 193, 179, 0.25);
+      --accent-text: #4DD4C6;
+
+      --text-primary: #E8ECEE;
+      --text-secondary: #8A9A9A;
+      --text-muted: #5A6A6A;
+      --text-inverse: #121E1E;
+
+      --border-default: rgba(58, 193, 179, 0.08);
+      --border-hover: rgba(58, 193, 179, 0.2);
+      --border-glow: rgba(58, 193, 179, 0.15);
+
+      --success: #2ba471;
+      --success-dim: rgba(43, 164, 113, 0.12);
+      --warning: #cf9937;
+      --warning-dim: rgba(207, 153, 55, 0.12);
+      --error: #ee493f;
+
+      --font-display: 'Syne', 'LXGW WenKai', 'PingFang SC', sans-serif;
+      --font-body: 'Sora', 'LXGW WenKai', 'PingFang SC', sans-serif;
+      --font-mono: 'JetBrains Mono', 'LXGW WenKai', monospace;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+
+      --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(58, 193, 179, 0.04);
+      --shadow-elevated: 0 8px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(58, 193, 179, 0.06);
+      --shadow-glow: 0 0 20px rgba(58, 193, 179, 0.1);
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+      --left-width: 40%;
+      --right-width: 60%;
+    }
+
+    /* ═══════════════════════════════════════════════
+       2. Reset & Base
+       ═══════════════════════════════════════════════ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: var(--font-body);
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--text-primary);
+      background: var(--bg-base);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ═══════════════════════════════════════════════
+       3. 背景氛围
+       ═══════════════════════════════════════════════ */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 40%, rgba(58, 193, 179, 0.04) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(58, 193, 179, 0.03) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ═══════════════════════════════════════════════
+       4. Layout
+       ═══════════════════════════════════════════════ */
+    .workspace {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      padding: 24px;
+      gap: 20px;
+    }
+
+    .left-col {
+      width: var(--left-width);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-width: 480px;
+      animation: slideInLeft 0.6s var(--ease-out) both;
+    }
+
+    .right-col {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      min-width: 560px;
+      animation: slideInRight 0.6s var(--ease-out) 0.1s both;
+    }
+
+    .resizer {
+      width: 4px;
+      height: 100%;
+      cursor: col-resize;
+      position: relative;
+      border-radius: 2px;
+      background: transparent;
+      transition: background 0.2s;
+    }
+
+    .resizer:hover {
+      background: var(--accent);
+    }
+
+    .resizer::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 2px;
+      height: 48px;
+      border-radius: 1px;
+      background: var(--text-muted);
+      opacity: 0.3;
+    }
+
+    /* ═══════════════════════════════════════════════
+       5. Card Component
+       ═══════════════════════════════════════════════ */
+    .card {
+      background: rgba(26, 42, 42, 0.75);
+      backdrop-filter: blur(24px) saturate(1.2);
+      -webkit-backdrop-filter: blur(24px) saturate(1.2);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-default);
+      box-shadow: var(--shadow-card);
+      transition: all 0.4s var(--ease-out);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(58,193,179,0.2), transparent 40%, transparent 60%, rgba(58,193,179,0.1));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+
+    .card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-elevated), 0 0 0 1px rgba(58,193,179,0.06);
+      transform: translateY(-2px);
+    }
+
+    .card:hover::before {
+      opacity: 1;
+    }
+
+    /* ═══════════════════════════════════════════════
+       6. Manager Desk
+       ═══════════════════════════════════════════════ */
+    .manager-desk {
+      flex: 1.3;
+      display: flex;
+      flex-direction: column;
+      padding: 28px;
+      gap: 18px;
+      min-height: 0;
+      overflow-y: auto;
+    }
+
+    .manager-desk::-webkit-scrollbar { width: 4px; }
+    .manager-desk::-webkit-scrollbar-thumb {
+      background: var(--text-muted);
+      border-radius: 2px;
+    }
+
+    .manager-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .manager-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #2A9D8F);
+      display: grid;
+      place-items: center;
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-inverse);
+      box-shadow: 0 0 16px var(--accent-glow);
+      flex-shrink: 0;
+    }
+
+    .manager-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .manager-name {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.02em;
+    }
+
+    .manager-role {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-weight: 500;
+      width: fit-content;
+    }
+
+    .manager-role::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    .manager-quote {
+      font-size: 14px;
+      color: var(--text-secondary);
+      padding: 12px 16px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border-left: 3px solid var(--accent);
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    .project-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+    }
+
+    .project-name {
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .project-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 100px;
+      letter-spacing: 0.02em;
+    }
+
+    .status-badge.running {
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .progress-track {
+      width: 120px;
+      height: 6px;
+      background: var(--bg-base);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-text));
+      border-radius: 3px;
+      width: 80%;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: shimmer 2s ease-in-out infinite;
+    }
+
+    /* KPI */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .kpi-card {
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      padding: 16px 12px;
+      text-align: center;
+      border: 1px solid var(--border-default);
+      transition: transform 0.2s var(--ease-spring), border-color 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-hover);
+    }
+
+    .kpi-card:hover::before {
+      opacity: 1;
+    }
+
+    .kpi-value {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text-primary);
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* Whiteboard */
+    .whiteboard {
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      border: 1px solid var(--border-default);
+    }
+
+    .whiteboard-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .kanban-board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .stat-card {
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-default);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s var(--ease-spring);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px) scale(1.02);
+    }
+
+    .stat-card.upcoming:hover {
+      box-shadow: 0 8px 32px rgba(232, 93, 138, 0.2);
+    }
+
+    .stat-card.inprogress:hover {
+      box-shadow: 0 8px 32px rgba(240, 176, 64, 0.2);
+    }
+
+    .stat-card.completed:hover {
+      box-shadow: 0 8px 32px rgba(43, 164, 113, 0.2);
+    }
+
+    .stat-card.upcoming {
+      background: linear-gradient(135deg, rgba(232, 93, 138, 0.12), rgba(232, 93, 138, 0.04));
+      border-color: rgba(232, 93, 138, 0.18);
+    }
+
+    .stat-card.inprogress {
+      background: linear-gradient(135deg, rgba(240, 176, 64, 0.12), rgba(240, 176, 64, 0.04));
+      border-color: rgba(240, 176, 64, 0.18);
+    }
+
+    .stat-card.completed {
+      background: linear-gradient(135deg, rgba(43, 164, 113, 0.12), rgba(43, 164, 113, 0.04));
+      border-color: rgba(43, 164, 113, 0.18);
+    }
+
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      display: grid;
+      place-items: center;
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    .stat-card.upcoming .stat-icon { background: rgba(232, 93, 138, 0.15); }
+    .stat-card.inprogress .stat-icon { background: rgba(240, 176, 64, 0.15); }
+    .stat-card.completed .stat-icon { background: rgba(43, 164, 113, 0.15); }
+
+    .stat-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .stat-card.upcoming .stat-value { color: #E85D8A; }
+    .stat-card.inprogress .stat-value { color: #F0B040; }
+    .stat-card.completed .stat-value { color: #3DBF7F; }
+
+    .wb-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-default);
+    }
+
+    .wb-footer-text {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .wb-footer-alert {
+      color: var(--warning);
+      font-weight: 600;
+    }
+
+    .wb-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 8px;
+      padding: 5px 12px;
+      background: var(--accent);
+      color: var(--text-inverse);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.2s;
+      border: none;
+      font-family: inherit;
+    }
+
+    .wb-action:hover {
+      box-shadow: 0 0 16px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    .wb-alert {
+      color: var(--warning);
+      font-weight: 500;
+    }
+
+    /* Mail Button */
+    .mail-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px;
+      background: var(--accent);
+      color: var(--text-inverse);
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s var(--ease-out);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mail-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.5s;
+    }
+
+    .mail-btn:hover::before {
+      transform: translateX(100%);
+    }
+
+    .mail-btn:hover {
+      box-shadow: 0 4px 24px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    /* ═══════════════════════════════════════════════
+       7. Agent Area
+       ═══════════════════════════════════════════════ */
+    .agent-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      gap: 14px;
+      min-height: 0;
+    }
+
+    .agent-header {
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .agent-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      overflow-y: auto;
+    }
+
+    .agent-list::-webkit-scrollbar { width: 4px; }
+    .agent-list::-webkit-scrollbar-thumb {
+      background: var(--text-muted);
+      border-radius: 2px;
+    }
+
+    .agent-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 16px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+      cursor: pointer;
+      transition: all 0.25s var(--ease-out);
+      position: relative;
+    }
+
+    .agent-row::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 0;
+      border-radius: 0 2px 2px 0;
+      background: var(--accent);
+      transition: height 0.3s var(--ease-out);
+    }
+
+    .agent-row:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-hover);
+      transform: translateX(4px);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2), inset 0 1px 0 rgba(58,193,179,0.05);
+    }
+
+    .agent-row:hover::before {
+      height: 60%;
+    }
+
+    .agent-row.active {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+    }
+
+    .agent-row.active::before {
+      height: 80%;
+    }
+
+    .agent-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-inverse);
+      flex-shrink: 0;
+    }
+
+    .agent-avatar.busy { background: linear-gradient(135deg, var(--accent), #2A9D8F); }
+    .agent-avatar.wait { background: linear-gradient(135deg, var(--warning), #A67B2D); }
+    .agent-avatar.idle { background: linear-gradient(135deg, var(--text-muted), #4A5A5A); }
+
+    .agent-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .agent-name {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .agent-status {
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .agent-status.busy { color: var(--accent); }
+    .agent-status.wait { color: var(--warning); }
+    .agent-status.idle { color: var(--text-muted); }
+
+    .agent-msg {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--text-muted);
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Agent Detail View */
+    .agent-detail {
+      display: none;
+      flex: 1;
+      gap: 0;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .agent-detail.active {
+      display: flex;
+    }
+
+    .agent-tabs {
+      width: 64px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px 8px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-default);
+      overflow-y: auto;
+    }
+
+    .agent-tab {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-inverse);
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all 0.25s var(--ease-spring);
+      flex-shrink: 0;
+    }
+
+    .agent-tab:hover {
+      transform: scale(1.08);
+    }
+
+    .agent-tab.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 16px var(--accent-glow);
+      transform: scale(1.1);
+    }
+
+    .agent-tab.busy { background: linear-gradient(135deg, var(--accent), #2A9D8F); }
+    .agent-tab.wait { background: linear-gradient(135deg, var(--warning), #A67B2D); }
+    .agent-tab.idle { background: linear-gradient(135deg, var(--text-muted), #4A5A5A); }
+
+    .agent-detail-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 20px;
+      overflow-y: auto;
+      min-height: 0;
+    }
+
+    .agent-detail-panel::-webkit-scrollbar { width: 4px; }
+    .agent-detail-panel::-webkit-scrollbar-thumb {
+      background: var(--text-muted);
+      border-radius: 2px;
+    }
+
+    .agent-detail-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      position: relative;
+    }
+
+    .agent-detail-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-display);
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-inverse);
+    }
+
+    .agent-detail-avatar.busy { background: linear-gradient(135deg, var(--accent), #2A9D8F); box-shadow: 0 0 16px var(--accent-glow); }
+    .agent-detail-avatar.wait { background: linear-gradient(135deg, var(--warning), #A67B2D); box-shadow: 0 0 16px rgba(207, 153, 55, 0.2); }
+    .agent-detail-avatar.idle { background: linear-gradient(135deg, var(--text-muted), #4A5A5A); }
+
+    .agent-detail-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .agent-detail-name {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .agent-detail-status {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .agent-detail-status.busy { color: var(--accent); }
+    .agent-detail-status.wait { color: var(--warning); }
+    .agent-detail-status.idle { color: var(--text-muted); }
+
+    .agent-detail-back {
+      padding: 6px 14px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .agent-detail-back:hover {
+      border-color: var(--border-hover);
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    .agent-detail-mail-header {
+      margin-left: auto;
+      padding: 8px 16px;
+      background: var(--accent);
+      color: var(--text-inverse);
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s var(--ease-out);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .agent-detail-mail-header:hover {
+      box-shadow: 0 4px 20px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    .agent-detail-section {
+      background: var(--bg-surface);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      border: 1px solid var(--border-default);
+    }
+
+    .agent-detail-section-title {
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .agent-detail-work {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .shared-avatar-clone {
+      position: fixed;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--text-inverse);
+      pointer-events: none;
+      z-index: 300;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: left, top, width, height;
+    }
+
+    .agent-subtasks {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .agent-subtask {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-default);
+    }
+
+    .agent-subtask-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .agent-subtask-dot.done { background: var(--success); box-shadow: 0 0 8px rgba(43, 164, 113, 0.4); }
+    .agent-subtask-dot.running { background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+    .agent-subtask-dot.wait { background: var(--warning); }
+    .agent-subtask-dot.idle { background: var(--text-muted); }
+
+    .agent-subtask-name {
+      flex: 1;
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    .agent-subtask-status {
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .agent-subtask-status.done { color: var(--success); }
+    .agent-subtask-status.running { color: var(--accent); }
+    .agent-subtask-status.wait { color: var(--warning); }
+    .agent-subtask-status.idle { color: var(--text-muted); }
+
+    .agent-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .agent-skill-tag {
+      padding: 5px 14px;
+      background: linear-gradient(135deg, rgba(58,193,179,0.12), rgba(58,193,179,0.06));
+      color: var(--accent);
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      border: 1px solid rgba(58,193,179,0.15);
+      transition: all 0.25s var(--ease-out);
+      cursor: default;
+    }
+
+    .agent-skill-tag:hover {
+      background: linear-gradient(135deg, rgba(58,193,179,0.22), rgba(58,193,179,0.1));
+      border-color: rgba(58,193,179,0.35);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(58,193,179,0.12);
+    }
+
+    .agent-del-accordion {
+      border: 1px solid var(--border-default);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+
+    .agent-del-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      cursor: pointer;
+      transition: background 0.2s;
+      user-select: none;
+    }
+
+    .agent-del-header:hover {
+      background: var(--bg-hover);
+    }
+
+    .agent-del-header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .agent-del-header-left::before {
+      content: '📦';
+      font-size: 14px;
+    }
+
+    .agent-del-arrow {
+      font-size: 12px;
+      color: var(--text-muted);
+      transition: transform 0.3s var(--ease-spring);
+    }
+
+    .agent-del-arrow.open {
+      transform: rotate(180deg);
+    }
+
+    .agent-del-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s var(--ease-out);
+      background: var(--bg-card);
+    }
+
+    .agent-del-content.open {
+      max-height: 300px;
+    }
+
+    .agent-del-inner {
+      padding: 0 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .agent-del-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: var(--bg-surface);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-default);
+      font-size: 13px;
+      color: var(--text-secondary);
+      transition: border-color 0.2s;
+    }
+
+    .agent-del-item:hover {
+      border-color: var(--border-hover);
+    }
+
+    .agent-del-item::before {
+      content: '📄';
+      font-size: 14px;
+    }
+
+    .agent-detail-mail {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px;
+      background: var(--accent);
+      color: var(--text-inverse);
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s var(--ease-out);
+      margin-top: auto;
+    }
+
+    .agent-detail-mail:hover {
+      box-shadow: 0 4px 20px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    /* ═══════════════════════════════════════════════
+       Mail Client Modal
+       ═══════════════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(18, 30, 30, 0.85);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      transition: opacity 0.3s var(--ease-out);
+      padding: 24px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal.mail-client {
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-default);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+      width: 1100px;
+      max-width: 95vw;
+      height: 720px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: row;
+      overflow: hidden;
+      transform: scale(0.96) translateY(16px);
+      transition: transform 0.35s var(--ease-spring);
+      position: relative;
+    }
+
+    .modal-overlay.active .modal.mail-client {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-default);
+      color: var(--text-secondary);
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      z-index: 10;
+    }
+
+    .modal-close:hover {
+      border-color: var(--border-hover);
+      color: var(--text-primary);
+      background: var(--bg-hover);
+    }
+
+    /* Sidebar - Agent avatars */
+    .mail-sidebar {
+      width: 64px;
+      background: rgba(0,0,0,0.15);
+      border-right: 1px solid var(--border-default);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 0;
+      gap: 12px;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+
+    .mail-sidebar-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-inverse);
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 2px solid transparent;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .mail-sidebar-avatar:hover {
+      transform: scale(1.08);
+    }
+
+    .mail-sidebar-avatar.active {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .mail-sidebar-avatar .mail-dot {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      border: 2px solid var(--bg-card);
+    }
+
+    /* Mail columns */
+    .mail-col {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border-default);
+    }
+
+    .mail-col-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 16px 12px;
+      border-bottom: 1px solid var(--border-default);
+      flex-shrink: 0;
+    }
+
+    .mail-col-title {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mail-col-badge {
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-family: var(--font-mono);
+    }
+
+    .mail-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .mail-item {
+      padding: 12px;
+      border-radius: var(--radius-md);
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .mail-item:hover {
+      background: var(--bg-surface);
+      border-color: var(--border-default);
+    }
+
+    .mail-item.active {
+      background: rgba(58, 193, 179, 0.08);
+      border-left: 3px solid var(--accent);
+    }
+
+    .mail-item-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .mail-item-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-inverse);
+      flex-shrink: 0;
+    }
+
+    .mail-item-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .mail-item-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      flex-shrink: 0;
+    }
+
+    .mail-item-subject {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.4;
+      margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .mail-item-snippet {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* Preview panel */
+    .mail-preview {
+      width: 360px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      background: rgba(0,0,0,0.08);
+    }
+
+    .mail-preview-empty {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 14px;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .mail-preview-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-default);
+      flex-shrink: 0;
+    }
+
+    .mail-preview-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .mail-preview-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-inverse);
+      flex-shrink: 0;
+    }
+
+    .mail-preview-from {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .mail-preview-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .mail-preview-role {
+      font-size: 11px;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      font-weight: 600;
+    }
+
+    .mail-preview-to {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .mail-preview-time {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      white-space: nowrap;
+    }
+
+    .mail-preview-subject {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.4;
+      font-family: var(--font-heading);
+    }
+
+    .mail-preview-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+    }
+
+    .mail-preview-body p {
+      margin-bottom: 12px;
+    }
+
+    /* ═══════════════════════════════════════════════
+       8. Tabs
+       ═══════════════════════════════════════════════ */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      padding: 6px;
+      background: var(--bg-card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-default);
+      width: fit-content;
+    }
+
+    .tab {
+      padding: 10px 24px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      transition: all 0.3s var(--ease-out);
+      position: relative;
+      letter-spacing: 0.02em;
+    }
+
+    .tab:hover {
+      color: var(--text-secondary);
+    }
+
+    .tab.active {
+      background: var(--accent);
+      color: var(--text-inverse);
+      box-shadow: 0 2px 12px var(--accent-glow);
+    }
+
+    /* ═══════════════════════════════════════════════
+       9. Gantt Chart
+       ═══════════════════════════════════════════════ */
+    .gantt-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 24px;
+      gap: 16px;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .gantt-header {
+      display: flex;
+      align-items: center;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .gantt-task-label {
+      width: 140px;
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .gantt-owner-label {
+      width: 80px;
+      font-family: var(--font-display);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .task-owner {
+      width: 80px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .task-owner-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-inverse);
+      flex-shrink: 0;
+    }
+
+    .task-owner-avatar.mgr { background: linear-gradient(135deg, var(--accent), #2A9D8F); }
+    .task-owner-avatar.a { background: linear-gradient(135deg, var(--accent), #2A9D8F); }
+    .task-owner-avatar.b { background: linear-gradient(135deg, var(--warning), #A67B2D); }
+    .task-owner-avatar.c { background: linear-gradient(135deg, var(--text-muted), #4A5A5A); }
+
+    .task-owner-name {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .gantt-time-scale {
+      flex: 1;
+      display: flex;
+      justify-content: space-between;
+      padding-left: 16px;
+    }
+
+    .time-slot {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+      position: relative;
+    }
+
+    .time-slot::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      width: 1px;
+      height: calc(100vh - 320px);
+      background: var(--border-default);
+      pointer-events: none;
+    }
+
+    .gantt-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .gantt-row {
+      display: flex;
+      align-items: center;
+      height: 64px;
+      position: relative;
+    }
+
+    .task-info {
+      width: 140px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .task-checkbox {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 2px solid var(--text-muted);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      font-size: 10px;
+    }
+
+    .task-checkbox.done {
+      background: var(--success);
+      border-color: var(--success);
+      color: white;
+    }
+
+    .task-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .task-timeline {
+      flex: 1;
+      height: 100%;
+      position: relative;
+      margin-left: 16px;
+    }
+
+    .task-bar {
+      position: absolute;
+      height: 28px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: white;
+      white-space: nowrap;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s var(--ease-spring), box-shadow 0.2s;
+    }
+
+    .task-bar:hover {
+      transform: translateY(-50%) scale(1.04);
+      z-index: 10;
+      filter: brightness(1.15);
+    }
+
+    .task-bar.done {
+      background: linear-gradient(90deg, var(--success), #3DBF7F);
+      box-shadow: 0 0 12px rgba(43, 164, 113, 0.25);
+    }
+
+    .task-bar.done:hover {
+      box-shadow: 0 0 24px rgba(43, 164, 113, 0.45);
+    }
+
+    .task-bar.running {
+      background: linear-gradient(90deg, var(--accent), var(--accent-text));
+      box-shadow: 0 0 12px var(--accent-glow);
+    }
+
+    .task-bar.running:hover {
+      box-shadow: 0 0 24px var(--accent-glow), 0 0 48px rgba(58,193,179,0.1);
+    }
+
+    .task-bar.wait {
+      background: linear-gradient(90deg, var(--warning), #E5B04A);
+      box-shadow: 0 0 12px rgba(207, 153, 55, 0.2);
+    }
+
+    .task-bar.wait:hover {
+      box-shadow: 0 0 24px rgba(207, 153, 55, 0.4);
+    }
+
+    .task-bar.idle {
+      background: var(--text-muted);
+    }
+
+    .task-status-label {
+      margin-left: auto;
+      font-size: 12px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .task-status-label.done { color: var(--success); }
+    .task-status-label.running { color: var(--accent); }
+    .task-status-label.wait { color: var(--warning); }
+    .task-status-label.idle { color: var(--text-muted); }
+
+    .current-time-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg, var(--accent), transparent);
+      z-index: 5;
+      pointer-events: none;
+      animation: timePulse 2.5s ease-in-out infinite;
+    }
+
+    .current-time-line::before {
+      content: '14:30';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--accent);
+      background: var(--bg-card);
+      padding: 2px 6px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    /* ═══════════════════════════════════════════════
+       10. Task Graph
+       ═══════════════════════════════════════════════ */
+    .task-graph {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: 40px;
+    }
+
+    .task-graph.active {
+      display: flex;
+    }
+
+    .tg-node {
+      width: 200px;
+      height: 52px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-size: 15px;
+      font-weight: 600;
+      color: white;
+      position: relative;
+      transition: transform 0.3s var(--ease-spring), box-shadow 0.3s;
+      cursor: pointer;
+    }
+
+    .tg-node:hover {
+      transform: scale(1.05);
+    }
+
+    .tg-node.done {
+      background: linear-gradient(135deg, var(--success), #3DBF7F);
+      box-shadow: 0 4px 20px rgba(43, 164, 113, 0.3);
+    }
+
+    .tg-node.running {
+      background: linear-gradient(135deg, var(--accent), var(--accent-text));
+      box-shadow: 0 4px 20px var(--accent-glow);
+    }
+
+    .tg-node.wait {
+      background: linear-gradient(135deg, var(--warning), #E5B04A);
+      box-shadow: 0 4px 20px rgba(207, 153, 55, 0.25);
+    }
+
+    .tg-node.idle {
+      background: var(--text-muted);
+    }
+
+    .tg-connector {
+      width: 2px;
+      height: 36px;
+      background: linear-gradient(180deg, var(--text-muted), var(--text-muted));
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tg-connector::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent, var(--accent), transparent);
+      animation: flowDown 2.5s ease-in-out infinite;
+    }
+
+    .tg-connector.branch {
+      height: 48px;
+      background: transparent;
+      width: 280px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .tg-connector.branch::before {
+      content: '';
+      width: 2px;
+      height: 100%;
+      background: var(--text-muted);
+    }
+
+    .tg-branch-row {
+      display: flex;
+      gap: 32px;
+      align-items: center;
+    }
+
+    .tg-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: white;
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    .tg-badge.done { color: var(--success); }
+    .tg-badge.running { color: var(--accent); }
+
+    /* ═══════════════════════════════════════════════
+       11. Elf Ball FAB
+       ═══════════════════════════════════════════════ */
+    .elf-ball {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #2A9D8F);
+      display: grid;
+      place-items: center;
+      font-size: 24px;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 4px 24px var(--accent-glow), 0 0 0 4px rgba(58, 193, 179, 0.1);
+      transition: all 0.3s var(--ease-spring);
+      z-index: 100;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .elf-ball:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 32px var(--accent-glow), 0 0 0 8px rgba(58, 193, 179, 0.08);
+    }
+
+    .elf-ball:active {
+      transform: scale(0.95);
+    }
+
+    /* ═══════════════════════════════════════════════
+       12. Animations
+       ═══════════════════════════════════════════════ */
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(200%); }
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    @keyframes timePulse {
+      0%, 100% { opacity: 0.7; box-shadow: 0 0 6px var(--accent-glow); }
+      50% { opacity: 1; box-shadow: 0 0 16px var(--accent-glow), 0 0 32px rgba(58,193,179,0.08); }
+    }
+
+    @keyframes flowDown {
+      0% { transform: translateY(-100%); opacity: 0; }
+      40% { opacity: 0.8; }
+      60% { opacity: 0.8; }
+      100% { transform: translateY(100%); opacity: 0; }
+    }
+
+    @keyframes countUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes glowSweep {
+      0% { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+
+    .reveal {
+      opacity: 0;
+      animation: fadeUp 0.5s var(--ease-out) forwards;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal:nth-child(1) { animation-delay: 0.05s; }
+    .reveal:nth-child(2) { animation-delay: 0.1s; }
+    .reveal:nth-child(3) { animation-delay: 0.15s; }
+    .reveal:nth-child(4) { animation-delay: 0.2s; }
+    .reveal:nth-child(5) { animation-delay: 0.25s; }
+
+    /* ═══════════════════════════════════════════════
+       13. Scrollbar
+       ═══════════════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: var(--text-muted);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+  </style>
+</head>
+<body>
+  <div class="workspace">
+    <!-- ═══════════════════════════════════════════════
+         LEFT COLUMN
+         ═══════════════════════════════════════════════ -->
+    <aside class="left-col">
+      <!-- Manager Desk -->
+      <div class="card manager-desk">
+        <div class="manager-header reveal">
+          <div class="manager-avatar">M</div>
+          <div class="manager-info">
+            <div class="manager-name">Manager</div>
+            <div class="manager-role">会议主持</div>
+          </div>
+        </div>
+
+        <div class="manager-quote reveal">
+          项目进展顺利，目前有 2 个 Agent 正在执行
+        </div>
+
+        <div class="project-bar reveal">
+          <span class="project-name">电商首页重构</span>
+          <div class="project-status">
+            <span class="status-badge running">进行中</span>
+            <div class="progress-track">
+              <div class="progress-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="kpi-grid reveal">
+          <div class="kpi-card">
+            <div class="kpi-value" data-count="4" data-suffix="h">0h</div>
+            <div class="kpi-label">已耗时</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value" data-count="12" data-prefix="$">$0</div>
+            <div class="kpi-label">累计费用</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value" data-count="6" data-suffix="h">0h</div>
+            <div class="kpi-label">预计耗时</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-value" data-count="18" data-prefix="$">$0</div>
+            <div class="kpi-label">预计费用</div>
+          </div>
+        </div>
+
+        <div class="whiteboard reveal">
+          <div class="whiteboard-title">任务看板</div>
+          <div class="kanban-board">
+            <div class="stat-card upcoming">
+              <div class="stat-icon">📋</div>
+              <div class="stat-title">即将处理</div>
+              <div class="stat-value">2</div>
+            </div>
+            <div class="stat-card inprogress">
+              <div class="stat-icon">⚡</div>
+              <div class="stat-title">正在处理</div>
+              <div class="stat-value">1</div>
+            </div>
+            <div class="stat-card completed">
+              <div class="stat-icon">✓</div>
+              <div class="stat-title">已经处理</div>
+              <div class="stat-value">1</div>
+            </div>
+          </div>
+          <div class="wb-footer">
+            <span class="wb-footer-text">⚠️ <span class="wb-footer-alert">1 个 Skill 待审批</span></span>
+            <button class="wb-action">去处理</button>
+          </div>
+        </div>
+
+        <button class="mail-btn reveal">
+          <span>📧</span>
+          <span>团队邮箱</span>
+        </button>
+      </div>
+
+      <!-- Agent Area -->
+      <div class="card agent-area">
+        <div class="agent-header" id="agent-header">
+          <span id="agent-header-text">Agent 团队</span>
+          <button class="agent-detail-back" id="agent-back" style="display:none;">返回列表</button>
+        </div>
+        <div class="agent-list" id="agent-list">
+          <div class="agent-row" data-agent="a">
+            <div class="agent-avatar busy">A</div>
+            <div class="agent-meta">
+              <div class="agent-name">Agent-A</div>
+              <div class="agent-status busy">busy</div>
+            </div>
+            <div class="agent-msg">编写用户认证 API...</div>
+          </div>
+          <div class="agent-row" data-agent="b">
+            <div class="agent-avatar wait">B</div>
+            <div class="agent-meta">
+              <div class="agent-name">Agent-B</div>
+              <div class="agent-status wait">wait</div>
+            </div>
+            <div class="agent-msg">等待 Skill 完成...</div>
+          </div>
+          <div class="agent-row" data-agent="c">
+            <div class="agent-avatar idle">C</div>
+            <div class="agent-meta">
+              <div class="agent-name">Agent-C</div>
+              <div class="agent-status idle">idle</div>
+            </div>
+            <div class="agent-msg">暂无任务</div>
+          </div>
+        </div>
+        <div class="agent-detail" id="agent-detail">
+          <div class="agent-tabs" id="agent-tabs">
+            <div class="agent-tab busy" data-agent="a">A</div>
+            <div class="agent-tab wait" data-agent="b">B</div>
+            <div class="agent-tab idle" data-agent="c">C</div>
+          </div>
+          <div class="agent-detail-panel" id="agent-detail-panel"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Resizer -->
+    <div class="resizer" id="resizer"></div>
+
+    <!-- ═══════════════════════════════════════════════
+         RIGHT COLUMN
+         ═══════════════════════════════════════════════ -->
+    <main class="right-col">
+      <!-- Tab Bar -->
+      <div class="tab-bar">
+        <button class="tab active" data-tab="timeline">⏱ 时间线</button>
+        <button class="tab" data-tab="graph">Task Graph</button>
+      </div>
+
+      <!-- Gantt Chart -->
+      <div class="card gantt-container" id="timeline-panel">
+        <div class="gantt-header">
+          <div class="gantt-owner-label">负责人</div>
+          <div class="gantt-task-label">任务</div>
+          <div class="gantt-time-scale">
+            <span class="time-slot">10:00</span>
+            <span class="time-slot">12:00</span>
+            <span class="time-slot">14:00</span>
+            <span class="time-slot">16:00</span>
+            <span class="time-slot">18:00</span>
+          </div>
+        </div>
+        <div class="gantt-body" id="gantt-body">
+          <div class="current-time-line" style="left: 52%"></div>
+
+          <div class="gantt-row">
+            <div class="task-owner">
+              <div class="task-owner-avatar mgr">M</div>
+              <span class="task-owner-name">Manager</span>
+            </div>
+            <div class="task-info">
+              <span class="task-name">需求分析</span>
+            </div>
+            <div class="task-timeline">
+              <div class="task-bar done" style="left: 0%; width: 20%">需求分析 2h</div>
+            </div>
+            <span class="task-status-label done">已完成</span>
+          </div>
+
+          <div class="gantt-row">
+            <div class="task-owner">
+              <div class="task-owner-avatar a">A</div>
+              <span class="task-owner-name">Agent-A</span>
+            </div>
+            <div class="task-info">
+              <span class="task-name">API开发</span>
+            </div>
+            <div class="task-timeline">
+              <div class="task-bar running" style="left: 20%; width: 40%">API开发 4h</div>
+            </div>
+            <span class="task-status-label running">进行中</span>
+          </div>
+
+          <div class="gantt-row">
+            <div class="task-owner">
+              <div class="task-owner-avatar b">B</div>
+              <span class="task-owner-name">Agent-B</span>
+            </div>
+            <div class="task-info">
+              <div class="task-checkbox"></div>
+              <span class="task-name">UI设计</span>
+            </div>
+            <div class="task-timeline">
+              <div class="task-bar wait" style="left: 60%; width: 20%">UI设计 2h</div>
+            </div>
+            <span class="task-status-label wait">等待</span>
+          </div>
+
+          <div class="gantt-row">
+            <div class="task-owner">
+              <div class="task-owner-avatar c">C</div>
+              <span class="task-owner-name">Agent-C</span>
+            </div>
+            <div class="task-info">
+              <div class="task-checkbox"></div>
+              <span class="task-name">集成测试</span>
+            </div>
+            <div class="task-timeline">
+              <div class="task-bar idle" style="left: 80%; width: 20%">集成测试</div>
+            </div>
+            <span class="task-status-label idle">未开始</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Task Graph -->
+      <div class="card task-graph" id="graph-panel">
+        <div class="tg-node done">
+          需求分析
+          <div class="tg-badge done">✓</div>
+        </div>
+        <div class="tg-connector"></div>
+        <div class="tg-branch-row">
+          <div class="tg-node running">
+            API开发
+            <div class="tg-badge running">↻</div>
+          </div>
+          <div class="tg-node wait">UI设计</div>
+        </div>
+        <div class="tg-connector"></div>
+        <div class="tg-node idle">集成测试</div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Elf Ball FAB -->
+  <button class="elf-ball">💬</button>
+
+  <!-- Mail Client Modal -->
+  <div class="modal-overlay" id="mail-modal">
+    <div class="modal mail-client">
+      <button class="modal-close" id="mail-modal-close">✕</button>
+      <div class="mail-sidebar" id="mail-sidebar"></div>
+      <div class="mail-col">
+        <div class="mail-col-header">
+          <span class="mail-col-title">📥 收件箱</span>
+          <span class="mail-col-badge" id="inbox-badge">0</span>
+        </div>
+        <div class="mail-list" id="inbox-list"></div>
+      </div>
+      <div class="mail-col">
+        <div class="mail-col-header">
+          <span class="mail-col-title">📤 发件箱</span>
+          <span class="mail-col-badge" id="sent-badge">0</span>
+        </div>
+        <div class="mail-list" id="sent-list"></div>
+      </div>
+      <div class="mail-preview" id="mail-preview">
+        <div class="mail-preview-empty">选择一封邮件查看详情</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════════════
+    // Tab Switching
+    // ═══════════════════════════════════════════════
+    const tabs = document.querySelectorAll('.tab');
+    const timelinePanel = document.getElementById('timeline-panel');
+    const graphPanel = document.getElementById('graph-panel');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        const target = tab.dataset.tab;
+        if (target === 'timeline') {
+          timelinePanel.style.display = 'flex';
+          graphPanel.classList.remove('active');
+        } else {
+          timelinePanel.style.display = 'none';
+          graphPanel.classList.add('active');
+        }
+      });
+    });
+
+    // ═══════════════════════════════════════════════
+    // Resizer
+    // ═══════════════════════════════════════════════
+    const resizer = document.getElementById('resizer');
+    const leftCol = document.querySelector('.left-col');
+    let isResizing = false;
+
+    resizer.addEventListener('mousedown', (e) => {
+      isResizing = true;
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+      const newWidth = (e.clientX / window.innerWidth) * 100;
+      if (newWidth > 25 && newWidth < 60) {
+        leftCol.style.width = newWidth + '%';
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      isResizing = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    });
+
+    // ═══════════════════════════════════════════════
+    // Agent Detail View
+    // ═══════════════════════════════════════════════
+    const agentData = {
+      a: {
+        name: 'Agent-A',
+        status: 'busy',
+        statusText: 'busy',
+        avatarClass: 'busy',
+        work: '编写用户认证 API，实现 JWT 登录注册逻辑，处理 token 刷新与过期机制',
+        subtasks: [
+          { name: '设计接口文档', status: 'done', statusText: '已完成' },
+          { name: '实现认证服务', status: 'running', statusText: '进行中' },
+          { name: '编写单元测试', status: 'idle', statusText: '未开始' }
+        ],
+        skills: ['Node.js', 'Express', 'JWT', 'MongoDB'],
+        deliverables: ['auth-api.md', 'auth-service.js', 'auth.test.js']
+      },
+      b: {
+        name: 'Agent-B',
+        status: 'wait',
+        statusText: 'wait',
+        avatarClass: 'wait',
+        work: '等待 API 接口完成，准备设计首页 UI 组件和交互流程',
+        subtasks: [
+          { name: '需求确认', status: 'done', statusText: '已完成' },
+          { name: 'Wireframe 原型', status: 'wait', statusText: '等待' },
+          { name: '高保真设计', status: 'idle', statusText: '未开始' }
+        ],
+        skills: ['Figma', 'UI Design', 'Design System'],
+        deliverables: ['homepage.fig', 'design-system.md']
+      },
+      c: {
+        name: 'Agent-C',
+        status: 'idle',
+        statusText: 'idle',
+        avatarClass: 'idle',
+        work: '暂无任务分配，等待项目进入测试阶段',
+        subtasks: [],
+        skills: ['Cypress', 'Jest', 'E2E Testing'],
+        deliverables: []
+      }
+    };
+
+    const mailData = {
+      a: {
+        inbox: [
+          {
+            id: 'a-in-1',
+            from: '系统',
+            fromId: 'system',
+            role: 'System',
+            avatarColor: '#5c5a54',
+            time: '10:50 AM',
+            subject: '⚠️ 任务变更提醒：请注意交付标准',
+            body: '检测到你的任务「前端页面切图与静态绑定」存在未对齐的交付标准风险：\n\n- 页面加载必须支持骨架屏过渡\n- 图片资源需使用 WebP 格式并配置懒加载\n- 暗黑模式色值需与设计稿完全一致\n\n请在今日 18:00 前确认并回复。'
+          },
+          {
+            id: 'a-in-2',
+            from: '张后端',
+            fromId: 'z',
+            role: 'Backend',
+            avatarColor: '#3662ec',
+            time: '10:45 AM',
+            subject: '登录接口 /api/v1/auth/login 已部署至 Dev 环境',
+            body: '王前端你好，\n\n登录接口已经发到 Dev 环境了，Swagger 文档同步更新。请求体需要包含经过 RSA 加密的 password 字段，返回体会带上 JWT Token 和 UserInfo。目前耗时压测在 200ms 左右，符合预期标准。\n\n你可以开始调接口了。'
+          },
+          {
+            id: 'a-in-3',
+            from: '李设计',
+            fromId: 'l',
+            role: 'Designer',
+            avatarColor: '#cf9937',
+            time: '10:30 AM',
+            subject: 'Figma 视觉稿已更新：包含表单错误状态',
+            body: 'Hi 前端，\n\nFigma 里的登录页面板我已经更新了，补全了输入框的 Error 状态和对应的动效说明。颜色标注也同步到了最新一版 Design Token。\n\n注意看一下手机号输入框的聚焦态，我调整了边框发光色值。'
+          },
+          {
+            id: 'a-in-4',
+            from: '赵测试',
+            fromId: 'x',
+            role: 'QA',
+            avatarColor: '#2bbb8a',
+            time: '09:15 AM',
+            subject: '上一轮接口测试报告',
+            body: '本轮接口测试共覆盖 42 个接口，通过率 95%。\n\n失败的 2 个接口：\n- /api/v1/auth/refresh：返回 500，需排查\n- /api/v1/user/profile：字段缺失 avatarUrl\n\n详细报告见附件，请查收。'
+          }
+        ],
+        sent: [
+          {
+            id: 'a-out-1',
+            to: '张后端',
+            toId: 'z',
+            role: 'Backend',
+            avatarColor: '#3662ec',
+            time: '11:20 AM',
+            subject: '请求协助：接口跨域问题报错',
+            body: '老张，我在本地调你 Dev 环境的 /api/v1/auth/login 接口报错了，看 Network 是 CORS 拦截。能不能把 localhost:3000 加到白名单？或者给我一份最新的 nginx 配置？\n\n急，今天需要联调完登录流程。'
+          },
+          {
+            id: 'a-out-2',
+            to: '赵测试',
+            toId: 'x',
+            role: 'QA',
+            avatarColor: '#2bbb8a',
+            time: '11:15 AM',
+            subject: '静态页面已部署至测试环境',
+            body: '静态页面和路由结构已经发版到测试环境了。你可以先去跑一遍 UI 的自动化脚本，看看有没有基础样式问题。\n\n登录页和注册页已完成，找回密码还在开发中，预计下午提测。'
+          }
+        ]
+      },
+      b: {
+        inbox: [
+          {
+            id: 'b-in-1',
+            from: '王前端',
+            fromId: 'w',
+            role: 'Frontend',
+            avatarColor: '#ee493f',
+            time: '10:45 AM',
+            subject: '登录接口 /api/v1/auth/login 已部署至 Dev 环境',
+            body: '张后端你好，\n\n登录接口已经发到 Dev 环境了，Swagger 文档同步更新。请求体需要包含经过 RSA 加密的 password 字段，返回体会带上 JWT Token 和 UserInfo。目前耗时压测在 200ms 左右，符合预期标准。\n\n你可以开始调接口了。'
+          },
+          {
+            id: 'b-in-2',
+            from: '李设计',
+            fromId: 'l',
+            role: 'Designer',
+            avatarColor: '#cf9937',
+            time: '10:40 AM',
+            subject: 'Re: Figma 视觉稿已更新',
+            body: '收到。SVG 图标我直接从 Figma 插件拉取了，不需要额外切图了。动效这块我用的 Framer Motion，你那边看看能不能还原。\n\n另外首页 Hero 区域的渐变背景，我改成了 CSS 渐变实现，减少一张大图资源。'
+          }
+        ],
+        sent: [
+          {
+            id: 'b-out-1',
+            from: 'Agent-B',
+            to: '李设计',
+            toId: 'l',
+            role: 'Designer',
+            avatarColor: '#cf9937',
+            time: '10:40 AM',
+            subject: 'Re: Figma 视觉稿已更新',
+            body: '收到。SVG 图标我直接从 Figma 插件拉取了，不需要额外切图了。动效这块我用的 Framer Motion，你那边看看能不能还原。\n\n另外首页 Hero 区域的渐变背景，我改成了 CSS 渐变实现，减少一张大图资源。'
+          }
+        ]
+      },
+      c: {
+        inbox: [
+          {
+            id: 'c-in-1',
+            from: '系统',
+            fromId: 'system',
+            role: 'System',
+            avatarColor: '#5c5a54',
+            time: '09:00 AM',
+            subject: '项目测试计划已生成',
+            body: '测试阶段即将开始，请根据项目排期准备测试环境。\n\n预计本周五开始第一轮功能测试，下周一进行回归测试。请提前准备好测试用例和自动化脚本。'
+          }
+        ],
+        sent: []
+      }
+    };
+
+    const agentList = document.getElementById('agent-list');
+    const agentDetail = document.getElementById('agent-detail');
+    const agentDetailPanel = document.getElementById('agent-detail-panel');
+    const agentTabs = document.getElementById('agent-tabs');
+    const agentHeader = document.getElementById('agent-header');
+    let currentAgent = null;
+
+    function renderAgentDetail(agentId) {
+      const data = agentData[agentId];
+      if (!data) return;
+
+      const subtasksHtml = data.subtasks.length
+        ? data.subtasks.map(st => `
+            <div class="agent-subtask">
+              <span class="agent-subtask-dot ${st.status}"></span>
+              <span class="agent-subtask-name">${st.name}</span>
+              <span class="agent-subtask-status ${st.status}">${st.statusText}</span>
+            </div>
+          `).join('')
+        : '<div style="font-size:13px;color:var(--text-muted);padding:8px 0;">暂无子任务</div>';
+
+      const skillsHtml = data.skills.map(s => `<span class="agent-skill-tag">${s}</span>`).join('');
+
+      function getFileIcon(name) {
+        const ext = name.split('.').pop()?.toLowerCase();
+        const icons = {
+          md: '📝', js: '📄', ts: '📘', test: '🧪', spec: '🧪',
+          fig: '🎨', html: '🌐', css: '🎨', scss: '🎨', json: '📋',
+          yml: '⚙️', yaml: '⚙️', dockerfile: '🐳', sh: '⌨️', py: '🐍'
+        };
+        return icons[ext] || '📄';
+      }
+
+      const deliverablesHtml = data.deliverables.length
+        ? data.deliverables.map(d => `<div class="agent-del-item">${getFileIcon(d)} ${d}</div>`).join('')
+        : '<div style="font-size:13px;color:var(--text-muted);padding:8px 0;">暂无交付物</div>';
+
+      agentDetailPanel.innerHTML = `
+        <div class="agent-detail-header">
+          <div class="agent-detail-avatar ${data.avatarClass}">${agentId.toUpperCase()}</div>
+          <div class="agent-detail-info">
+            <div class="agent-detail-name">${data.name}</div>
+            <div class="agent-detail-status ${data.status}">${data.statusText}</div>
+          </div>
+          <button class="agent-detail-mail-header">📧 邮件</button>
+        </div>
+
+        <div class="agent-detail-section">
+          <div class="agent-detail-section-title">当前工作</div>
+          <div class="agent-detail-work">${data.work}</div>
+        </div>
+
+        <div class="agent-detail-section">
+          <div class="agent-detail-section-title">子任务进度</div>
+          <div class="agent-subtasks">${subtasksHtml}</div>
+        </div>
+
+        <div class="agent-detail-section">
+          <div class="agent-detail-section-title">Skills</div>
+          <div class="agent-skills">${skillsHtml}</div>
+        </div>
+
+        <div class="agent-detail-section">
+          <div class="agent-detail-section-title">交付物</div>
+          <div class="agent-del-accordion" id="del-accordion">
+            <div class="agent-del-header" id="del-header">
+              <div class="agent-del-header-left">📦 查看交付物 (${data.deliverables.length})</div>
+              <span class="agent-del-arrow open" id="del-arrow">▼</span>
+            </div>
+            <div class="agent-del-content open" id="del-content">
+              <div class="agent-del-inner">${deliverablesHtml}</div>
+            </div>
+          </div>
+        </div>
+
+      `;
+
+      document.getElementById('agent-back').addEventListener('click', showAgentList);
+
+      document.querySelector('.agent-detail-mail-header').addEventListener('click', () => openMailModal(agentId));
+
+      document.getElementById('del-header').addEventListener('click', () => {
+        const content = document.getElementById('del-content');
+        const arrow = document.getElementById('del-arrow');
+        content.classList.toggle('open');
+        arrow.classList.toggle('open');
+      });
+    }
+
+    const agentHeaderText = document.getElementById('agent-header-text');
+    const agentBackBtn = document.getElementById('agent-back');
+
+    function showAgentDetail(agentId) {
+      currentAgent = agentId;
+      agentList.style.display = 'none';
+      agentDetail.classList.add('active');
+      agentHeaderText.textContent = 'Agent 详情';
+      agentBackBtn.style.display = '';
+
+      agentTabs.querySelectorAll('.agent-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.agent === agentId);
+      });
+
+      renderAgentDetail(agentId);
+    }
+
+    function showAgentList() {
+      currentAgent = null;
+      agentList.style.display = 'flex';
+      agentDetail.classList.remove('active');
+      agentHeaderText.textContent = 'Agent 团队';
+      agentBackBtn.style.display = 'none';
+    }
+
+    let isAnimating = false;
+
+    function animateToDetail(agentId, sourceAvatar) {
+      if (isAnimating) return;
+      isAnimating = true;
+
+      const startRect = sourceAvatar.getBoundingClientRect();
+
+      // 1. Hide panel content BEFORE showing detail (no transition)
+      agentDetailPanel.style.transition = 'none';
+      agentDetailPanel.style.opacity = '0';
+
+      // 2. Show detail view
+      currentAgent = agentId;
+      agentList.style.display = 'none';
+      agentDetail.classList.add('active');
+      agentHeaderText.textContent = 'Agent 详情';
+      agentBackBtn.style.display = '';
+
+      agentTabs.querySelectorAll('.agent-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.agent === agentId);
+      });
+
+      renderAgentDetail(agentId);
+
+      const targetAvatar = agentDetailPanel.querySelector('.agent-detail-avatar');
+      const endRect = targetAvatar.getBoundingClientRect();
+
+      // 3. Create clone at start position
+      const clone = sourceAvatar.cloneNode(true);
+      clone.classList.add('shared-avatar-clone');
+      clone.style.left = startRect.left + 'px';
+      clone.style.top = startRect.top + 'px';
+      clone.style.width = startRect.width + 'px';
+      clone.style.height = startRect.height + 'px';
+      clone.style.fontSize = window.getComputedStyle(sourceAvatar).fontSize;
+      document.body.appendChild(clone);
+
+      // 4. Hide avatars
+      sourceAvatar.style.opacity = '0';
+      targetAvatar.style.opacity = '0';
+
+      // 5. Trigger flight + fade in panel
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          clone.style.left = endRect.left + 'px';
+          clone.style.top = endRect.top + 'px';
+          clone.style.width = endRect.width + 'px';
+          clone.style.height = endRect.height + 'px';
+
+          agentDetailPanel.style.transition = 'opacity 0.3s ease 0.1s';
+          agentDetailPanel.style.opacity = '1';
+        });
+      });
+
+      clone.addEventListener('transitionend', () => {
+        targetAvatar.style.opacity = '1';
+        clone.remove();
+        isAnimating = false;
+        sourceAvatar.style.opacity = '';
+      }, { once: true });
+    }
+
+    function animateToList() {
+      if (isAnimating || !currentAgent) return;
+      isAnimating = true;
+
+      const sourceAvatar = agentDetailPanel.querySelector('.agent-detail-avatar');
+      const startRect = sourceAvatar.getBoundingClientRect();
+
+      // Measure target without affecting layout
+      const savedListCss = agentList.style.cssText;
+      agentList.style.cssText = 'display:flex;position:absolute;visibility:hidden;pointer-events:none;';
+      const targetRow = document.querySelector(`.agent-row[data-agent="${currentAgent}"]`);
+      const targetAvatar = targetRow.querySelector('.agent-avatar');
+      const endRect = targetAvatar.getBoundingClientRect();
+      agentList.style.cssText = savedListCss;
+
+      // Create clone
+      const clone = sourceAvatar.cloneNode(true);
+      clone.classList.add('shared-avatar-clone');
+      clone.style.left = startRect.left + 'px';
+      clone.style.top = startRect.top + 'px';
+      clone.style.width = startRect.width + 'px';
+      clone.style.height = startRect.height + 'px';
+      clone.style.fontSize = window.getComputedStyle(sourceAvatar).fontSize;
+      document.body.appendChild(clone);
+
+      // Hide avatars and panel
+      sourceAvatar.style.opacity = '0';
+      targetAvatar.style.opacity = '0';
+      agentDetailPanel.style.transition = 'none';
+      agentDetailPanel.style.opacity = '0';
+
+      // Prepare list (hidden but ready to fade in)
+      agentList.style.display = 'flex';
+      agentList.style.transition = 'none';
+      agentList.style.opacity = '0';
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          clone.style.left = endRect.left + 'px';
+          clone.style.top = endRect.top + 'px';
+          clone.style.width = endRect.width + 'px';
+          clone.style.height = endRect.height + 'px';
+
+          // Fade in list as clone flies
+          agentList.style.transition = 'opacity 0.25s ease 0.12s';
+          agentList.style.opacity = '1';
+        });
+      });
+
+      clone.addEventListener('transitionend', () => {
+        agentDetail.classList.remove('active');
+        targetAvatar.style.opacity = '1';
+        clone.remove();
+
+        currentAgent = null;
+        agentHeaderText.textContent = 'Agent 团队';
+        agentBackBtn.style.display = 'none';
+        agentDetailPanel.style.opacity = '';
+        agentDetailPanel.style.transition = '';
+        agentList.style.transition = '';
+        isAnimating = false;
+      }, { once: true });
+    }
+
+    agentBackBtn.addEventListener('click', animateToList);
+
+    document.querySelectorAll('.agent-row').forEach(row => {
+      row.addEventListener('click', () => {
+        const avatar = row.querySelector('.agent-avatar');
+        animateToDetail(row.dataset.agent, avatar);
+      });
+    });
+
+    agentTabs.querySelectorAll('.agent-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        if (tab.dataset.agent !== currentAgent && !isAnimating) {
+          showAgentDetail(tab.dataset.agent);
+        }
+      });
+    });
+
+    // ═══════════════════════════════════════════════
+    // Mail Client
+    // ═══════════════════════════════════════════════
+    const mailModal = document.getElementById('mail-modal');
+    const mailSidebar = document.getElementById('mail-sidebar');
+    const inboxList = document.getElementById('inbox-list');
+    const sentList = document.getElementById('sent-list');
+    const inboxBadge = document.getElementById('inbox-badge');
+    const sentBadge = document.getElementById('sent-badge');
+    const mailPreview = document.getElementById('mail-preview');
+    let currentMailAgent = null;
+    let selectedMailId = null;
+
+    function getAvatarColor(id) {
+      const colors = {
+        a: '#ee493f', b: '#cf9937', c: '#2bbb8a',
+        z: '#3662ec', l: '#cf9937', x: '#2bbb8a', w: '#ee493f',
+        system: '#5c5a54'
+      };
+      return colors[id] || '#3AC1B3';
+    }
+
+    function renderMailSidebar(activeId) {
+      mailSidebar.innerHTML = Object.entries(agentData).map(([id, data]) => `
+        <div class="mail-sidebar-avatar ${id === activeId ? 'active' : ''}"
+             data-agent="${id}"
+             style="background:${getAvatarColor(id)}"
+             title="${data.name}">
+          ${id.toUpperCase()}
+          <span class="mail-dot" style="background:${data.status === 'busy' ? '#ee493f' : data.status === 'wait' ? '#cf9937' : '#2bbb8a'}"></span>
+        </div>
+      `).join('');
+
+      mailSidebar.querySelectorAll('.mail-sidebar-avatar').forEach(el => {
+        el.addEventListener('click', () => {
+          currentMailAgent = el.dataset.agent;
+          renderMailLists(currentMailAgent);
+          selectedMailId = null;
+          renderMailPreview();
+          renderMailSidebar(currentMailAgent);
+        });
+      });
+    }
+
+    function renderMailItem(mail, type) {
+      const isActive = selectedMailId === mail.id;
+      const isSent = type === 'sent';
+      const name = isSent ? (mail.to || '未知') : mail.from;
+      const avatarId = isSent ? (mail.toId || '') : (mail.fromId || '');
+      return `
+        <div class="mail-item ${isActive ? 'active' : ''}" data-id="${mail.id}" data-type="${type}">
+          <div class="mail-item-top">
+            <div class="mail-item-avatar" style="background:${mail.avatarColor || getAvatarColor(avatarId)}">${name.charAt(0)}</div>
+            <div class="mail-item-name">${name}</div>
+            <div class="mail-item-time">${mail.time}</div>
+          </div>
+          <div class="mail-item-subject">${mail.subject}</div>
+          <div class="mail-item-snippet">${mail.body.replace(/\n/g, ' ').substring(0, 60)}...</div>
+        </div>
+      `;
+    }
+
+    function renderMailLists(agentId) {
+      const data = mailData[agentId];
+      if (!data) return;
+
+      inboxBadge.textContent = data.inbox.length;
+      sentBadge.textContent = data.sent.length;
+
+      inboxList.innerHTML = data.inbox.length
+        ? data.inbox.map(m => renderMailItem(m, 'inbox')).join('')
+        : '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">暂无邮件</div>';
+
+      sentList.innerHTML = data.sent.length
+        ? data.sent.map(m => renderMailItem(m, 'sent')).join('')
+        : '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">暂无邮件</div>';
+
+      inboxList.querySelectorAll('.mail-item').forEach(el => {
+        el.addEventListener('click', () => selectMail(el.dataset.id, el.dataset.type));
+      });
+      sentList.querySelectorAll('.mail-item').forEach(el => {
+        el.addEventListener('click', () => selectMail(el.dataset.id, el.dataset.type));
+      });
+    }
+
+    function selectMail(mailId, type) {
+      selectedMailId = mailId;
+      const agentMail = mailData[currentMailAgent];
+      if (!agentMail) return;
+      const list = type === 'inbox' ? agentMail.inbox : agentMail.sent;
+      const mail = list.find(m => m.id === mailId);
+      if (!mail) return;
+
+      renderMailLists(currentMailAgent);
+      renderMailPreview(mail, type);
+    }
+
+    function renderMailPreview(mail, type) {
+      if (!mail) {
+        mailPreview.innerHTML = '<div class="mail-preview-empty">选择一封邮件查看详情</div>';
+        return;
+      }
+      const isSent = type === 'sent';
+      const name = isSent ? (mail.to || '未知') : mail.from;
+      const avatarId = isSent ? (mail.toId || '') : (mail.fromId || '');
+      const label = isSent ? '发送至' : '来自';
+
+      mailPreview.innerHTML = `
+        <div class="mail-preview-header">
+          <div class="mail-preview-subject">${mail.subject}</div>
+        </div>
+        <div style="padding:16px 24px;border-bottom:1px solid var(--border-default);">
+          <div class="mail-preview-meta">
+            <div class="mail-preview-avatar" style="background:${mail.avatarColor || getAvatarColor(avatarId)}">${name.charAt(0)}</div>
+            <div class="mail-preview-from">
+              <div class="mail-preview-name">${name} <span class="mail-preview-role">${mail.role || 'Team'}</span></div>
+              <div class="mail-preview-to">${label} ${isSent ? mail.to : '我'}</div>
+            </div>
+            <div class="mail-preview-time">${mail.time}</div>
+          </div>
+        </div>
+        <div class="mail-preview-body">${mail.body.replace(/\n/g, '<br>')}</div>
+      `;
+    }
+
+    function openMailModal(agentId) {
+      currentMailAgent = agentId;
+      selectedMailId = null;
+      renderMailSidebar(agentId);
+      renderMailLists(agentId);
+      renderMailPreview();
+      mailModal.classList.add('active');
+    }
+
+    function closeMailModal() {
+      mailModal.classList.remove('active');
+      currentMailAgent = null;
+      selectedMailId = null;
+    }
+
+    document.getElementById('mail-modal-close').addEventListener('click', closeMailModal);
+
+    mailModal.addEventListener('click', (e) => {
+      if (e.target === mailModal) closeMailModal();
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && mailModal.classList.contains('active')) {
+        closeMailModal();
+      }
+    });
+
+    // ═══════════════════════════════════════════════
+    // CountUp animation for KPI values
+    // ═══════════════════════════════════════════════
+    function animateCountUp() {
+      document.querySelectorAll('.kpi-value[data-count]').forEach(el => {
+        const target = parseInt(el.dataset.count, 10);
+        const prefix = el.dataset.prefix || '';
+        const suffix = el.dataset.suffix || '';
+        const duration = 1200;
+        const start = performance.now();
+
+        function tick(now) {
+          const elapsed = now - start;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const current = Math.round(eased * target);
+          el.textContent = prefix + current + suffix;
+          if (progress < 1) requestAnimationFrame(tick);
+        }
+
+        requestAnimationFrame(tick);
+      });
+    }
+
+    // ═══════════════════════════════════════════════
+    // Stagger reveal on load
+    // ═══════════════════════════════════════════════
+    document.querySelectorAll('.agent-row, .gantt-row').forEach((el, i) => {
+      el.style.opacity = '0';
+      el.style.animation = `fadeUp 0.5s var(--ease-out) ${0.4 + i * 0.06}s forwards`;
+    });
+
+    // Trigger countUp after a short delay
+    setTimeout(animateCountUp, 400);
+  </script>
+</body>
+</html>

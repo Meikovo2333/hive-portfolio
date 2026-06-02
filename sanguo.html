@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魏蜀三国圣地巡礼攻略生成器</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f0f0f0;
+        }
+        .container {
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        .page {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            page-break-after: always;
+        }
+        .page:last-child {
+            page-break-after: auto;
+        }
+        h1 {
+            text-align: center;
+            color: #8B0000;
+            font-size: 28px;
+            margin-bottom: 5px;
+            border-bottom: 3px solid #8B0000;
+            padding-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        
+        /* 控制面板 */
+        .control-panel {
+            background: #fafafa;
+            border: 2px solid #8B0000;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+        .panel-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #8B0000;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+        .control-label {
+            font-size: 13px;
+            color: #666;
+            font-weight: bold;
+        }
+        .day-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .day-btn {
+            padding: 10px 18px;
+            border: 2px solid #8B0000;
+            background: white;
+            color: #8B0000;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .day-btn:hover {
+            background: #8B0000;
+            color: white;
+        }
+        .day-btn.active {
+            background: #8B0000;
+            color: white;
+            box-shadow: 0 2px 8px rgba(139,0,0,0.3);
+        }
+        .departure-box {
+            background: #fff8f0;
+            border: 2px solid #DAA520;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #8B0000;
+        }
+        
+        /* 路线概览卡片 */
+        .route-header {
+            background: linear-gradient(135deg, #8B0000 0%, #DAA520 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .route-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .route-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            opacity: 0.95;
+            flex-wrap: wrap;
+        }
+        .route-tag {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 10px;
+            border-radius: 12px;
+        }
+        
+        /* 交通方案 */
+        .transport-box {
+            background: #f0f8ff;
+            border-left: 5px solid #4682B4;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .transport-title {
+            font-weight: bold;
+            color: #4682B4;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .transport-detail {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.8;
+        }
+        
+        /* 每日行程 */
+        .day-card {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 12px 0;
+        }
+        .day-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #8B0000;
+            margin-bottom: 8px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #DAA520;
+        }
+        .day-content {
+            font-size: 13px;
+            color: #444;
+            line-height: 1.7;
+        }
+        .time-slot {
+            color: #666;
+            font-weight: bold;
+        }
+        
+        /* 景点卡片 */
+        .spots-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin: 15px 0;
+        }
+        .spot-card {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .spot-img {
+            width: 100px;
+            height: 75px;
+            background: #e8e8e8;
+            border-radius: 6px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 11px;
+            text-align: center;
+        }
+        .spot-info h4 {
+            color: #8B0000;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+        .spot-meta {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+        .spot-desc {
+            font-size: 12px;
+            color: #555;
+            line-height: 1.5;
+        }
+        
+        /* 预算表 */
+        .budget-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 13px;
+        }
+        .budget-table th, .budget-table td {
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            text-align: left;
+        }
+        .budget-table th {
+            background: #8B0000;
+            color: white;
+        }
+        .budget-table tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .budget-table td:last-child {
+            text-align: right;
+            font-weight: bold;
+            color: #8B0000;
+        }
+        
+        /* 提示框 */
+        .tips-box {
+            background: #fffacd;
+            border: 1px solid #DAA520;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .tips-title {
+            font-weight: bold;
+            color: #8B0000;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .tips-box ul {
+            margin-left: 18px;
+            font-size: 13px;
+            color: #555;
+        }
+        .tips-box li {
+            margin-bottom: 5px;
+        }
+        
+        /* 打印按钮 */
+        .print-btn {
+            display: block;
+            width: 200px;
+            margin: 20px auto;
+            padding: 12px;
+            background: #8B0000;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+        }
+        .print-btn:hover {
+            background: #6B0000;
+        }
+        
+        @media print {
+            .control-panel, .print-btn {
+                display: none !important;
+            }
+            .page {
+                box-shadow: none;
+                margin: 0;
+                page-break-after: always;
+            }
+            body {
+                background: white;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- 控制面板 -->
+    <div class="control-panel no-print">
+        <div class="panel-title">🎯 攻略生成器</div>
+        <div class="controls">
+            <div class="control-group">
+                <span class="control-label">出发地</span>
+                <div class="departure-box">📍 上海</div>
+            </div>
+            <div class="control-group">
+                <span class="control-label">选择出行天数</span>
+                <div class="day-buttons">
+                    <button class="day-btn active" onclick="generateRoute(2)">2天周末</button>
+                    <button class="day-btn" onclick="generateRoute(3)">3天小长假</button>
+                    <button class="day-btn" onclick="generateRoute(4)">4天</button>
+                    <button class="day-btn" onclick="generateRoute(5)">5天</button>
+                    <button class="day-btn" onclick="generateRoute(6)">6天</button>
+                    <button class="day-btn" onclick="generateRoute(7)">7天+大环线</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="print-btn no-print" onclick="window.print()">🖨️ 保存为PDF / 打印</button>
+
+    <!-- 动态内容区域 -->
+    <div id="route-content">
+        <!-- 内容由JavaScript生成 -->
+    </div>
+</div>
+
+<script>
+// 路线数据库
+const routeDatabase = {
+    2: {
+        name: "周末快闪·蜀汉核心",
+        theme: "刘备集团（蜀汉）",
+        cities: "上海 ↔ 成都",
+        transport: "✈️ 飞机往返",
+        difficulty: "⭐⭐⭐（紧凑）",
+        totalBudget: "2000-2800元",
+        highlights: ["武侯祠", "锦里古街", "大熊猫基地"],
+        transportDetail: `
+            <strong>去程（周五晚）</strong>：上海浦东/虹桥 → 成都双流/天府<br>
+            推荐航班：MU5401（19:15-22:40）或 3U8964（20:00-23:30）<<br>
+            <strong>返程（周日晚）</strong>：成都双流/天府 → 上海<br>
+            推荐航班：MU5406（17:30-20:15）或 3U8965（18:00-20:45）<<br>
+            <strong>当地交通</strong>：地铁+打车，成都景点集中，交通便利
+        `,
+        days: [
+            {
+                title: "Day 1（周六）· 刘备与诸葛亮",
+                content: `
+                    <span class="time-slot">08:30-11:30</span> <strong>武侯祠</strong>（门票50元）<<br>
+                    中国唯一君臣合祀祠庙，刘备惠陵与诸葛亮殿并存。重点：刘备殿、惠陵、三绝碑、文臣武将廊。<br><br>
+                    <span class="time-slot">11:30-13:30</span> <strong>锦里古街午餐</strong><br>
+                    推荐：担担面、钵钵鸡、三大炮、肥肠粉。边吃边逛三国主题小店。<br><br>
+                    <span class="time-slot">14:00-16:30</span> <strong>杜甫草堂</strong>（门票50元）<<br>
+                    虽非三国遗迹，但杜甫写尽蜀汉兴衰，《蜀相》名篇诞生地，氛围契合。<br><br>
+                    <span class="time-slot">17:00-18:30</span> <strong>宽窄巷子</strong><br>
+                    成都慢生活体验，晚餐推荐"成都映象"或街头火锅。<br><br>
+                    <span class="time-slot">20:00-21:30</span> <strong>锦江夜游</strong>（可选）<<br>
+                    乘船看成都夜景，结束充实第一天。
+                `
+            },
+            {
+                title: "Day 2（周日）· 国宝与返程",
+                content: `
+                    <span class="time-slot">07:30-11:00</span> <strong>大熊猫繁育基地</strong>（门票55元）<<br>
+                    早上熊猫最活跃，看花花等明星熊猫。建议7:30前到，避开人流。<br><br>
+                    <span class="time-slot">11:30-13:00</span> <strong>午餐</strong>：基地附近或回市区吃翘脚牛肉<br><br>
+                    <span class="time-slot">14:00-15:30</span> <strong>金沙遗址博物馆</strong>（门票70元，可选）<<br>
+                    古蜀文明，太阳神鸟出土地，与三国文化一脉相承。<br><br>
+                    <span class="time-slot">16:00</span> 前往机场，结束周末之旅。<br>
+                    <em>提示：如航班较晚，可追加人民公园鹤鸣茶社体验成都茶文化。</em>
+                `
+            }
+        ],
+        spots: [
+            {
+                name: "成都武侯祠",
+                meta: "📍 武侯区 | 🎫 50元 | ⏰ 2.5小时",
+                desc: "全国唯一君臣合祀祠庙，刘备惠陵与诸葛亮武侯祠并存。刘备殿正中供刘备塑像，东廊为文臣（庞统、法正等），西廊为武将。惠陵在祠后，封土高12米。"
+            },
+            {
+                name: "锦里古街",
+                meta: "📍 武侯祠旁 | 🎫 免费 | ⏰ 2小时",
+                desc: "西蜀最古老商业街，三国主题沉浸式体验。有桃园结义雕像、三国人物脸谱、诸葛连弩模型等。夜景尤佳，红灯笼高挂。"
+            },
+            {
+                name: "成都大熊猫基地",
+                meta: "📍 成华区 | 🎫 55元 | ⏰ 3小时",
+                desc: "虽非三国遗迹，但作为成都必去景点，可与武侯祠组成完整周末行程。建议早到，上午熊猫进食最活跃。"
+            }
+        ],
+        budget: [
+            { item: "往返机票", cost: "1200-1800元" },
+            { item: "住宿（2晚）", cost: "300-600元" },
+            { item: "门票", cost: "155元" },
+            { item: "当地交通", cost: "100-150元" },
+            { item: "餐饮", cost: "400-600元" },
+            { item: "合计", cost: "2000-2800元", total: true }
+        ],
+        tips: [
+            "周五务必选19:00前起飞的航班，确保当晚到成都休息好",
+            "武侯祠8:30开门即入，10点后旅行团涌入",
+            "大熊猫基地必须早去（7:30前），下午熊猫都在睡觉",
+            "成都地铁支持支付宝/微信，无需买实体票",
+            "火锅选'蜀大侠'或'小龙坎'，避免景区高价店"
+        ]
+    },
+    
+    3: {
+        name: "小长假·曹魏东都",
+        theme: "曹操集团（曹魏）",
+        cities: "上海 → 洛阳",
+        transport: "🚄 高铁/✈️ 飞机",
+        difficulty: "⭐⭐（轻松）",
+        totalBudget: "2200-3200元",
+        highlights: ["关林", "龙门石窟", "白马寺"],
+        transportDetail: `
+            <strong>高铁方案</strong>：上海虹桥 → 洛阳龙门站（G1920，06:24-11:45，约5.5小时，票价512元）<<br>
+            <strong>飞机方案</strong>：上海浦东 → 洛阳北郊机场（航班少，建议飞郑州转高铁）<<br>
+            <strong>返程</strong>：洛阳龙门站 → 上海虹桥（G1922，15:30-21:00）<<br>
+            <strong>当地交通</strong>：地铁+公交+打车，洛阳景点较分散建议打车
+        `,
+        days: [
+            {
+                title: "Day 1（抵达日）· 关羽首级冢",
+                content: `
+                    <span class="time-slot">12:00前</span> 抵达洛阳，入住酒店（建议老城区丽景门附近）<<br><br>
+                    <span class="time-slot">14:00-16:30</span> <strong>关林</strong>（门票40元）<<br>
+                    曹操以王侯礼葬关羽首级处，全国三大关庙之一。重点：千秋鉴、大殿关帝像、关冢（首级埋葬地）。<<br><br>
+                    <span class="time-slot">17:00-18:30</span> <strong>丽景门+十字街</strong><br>
+                    洛阳老城地标，晚餐吃水席（推荐"真不同"或街头小店）。<<br><br>
+                    <span class="time-slot">20:00-21:00</span> <strong>洛邑古城夜景</strong>（免费）<<br>
+                    汉服拍照圣地，感受魏晋风华。
+                `
+            },
+            {
+                title: "Day 2（核心日）· 龙门与博物馆",
+                content: `
+                    <span class="time-slot">08:00-12:30</span> <strong>龙门石窟</strong>（门票90元）<<br>
+                    世界遗产，虽非三国但必看。北魏至唐代皇家石窟，卢舍那大佛震撼。建议西北服务区进，少走回头路。<br><br>
+                    <span class="time-slot">12:30-13:30</span> 景区附近农家午餐（推荐黄河鲤鱼）<<br><br>
+                    <span class="time-slot">14:30-17:00</span> <strong>洛阳博物馆</strong>（免费，需预约）<<br>
+                    重点看三国文物：铜驼、陶俑、墓志。了解汉魏洛阳城历史。<br><br>
+                    <span class="time-slot">17:30-19:00</span> <strong>应天门遗址</strong>（可选）<<br>
+                    隋唐洛阳城正门，夜景灯光秀值得一看。
+                `
+            },
+            {
+                title: "Day 3（返程日）· 汉魏遗风",
+                content: `
+                    <span class="time-slot">08:30-11:00</span> <strong>白马寺</strong>（门票35元）<<br>
+                    中国第一古刹，东汉建立，三国时期已存在。看齐云塔、印度佛殿。<br><br>
+                    <span class="time-slot">11:30-13:00</span> <strong>汉魏洛阳城遗址</strong>（免费）<<br>
+                    东汉、曹魏、西晋都城，铜驼大街遗址。需想象力，建议提前看纪录片。<br><br>
+                    <span class="time-slot">14:00</span> 前往洛阳龙门站，返程回沪。<br>
+                    <em>如时间充裕，可追加天子驾六博物馆（30元）。</em>
+                `
+            }
+        ],
+        spots: [
+            {
+                name: "关林",
+                meta: "📍 洛龙区 | 🎫 40元 | ⏰ 2小时",
+                desc: "孙权送关羽首级于曹操，曹操以沉香木为躯，王侯礼葬于此。大殿有贴金关帝像，关冢前石牌坊刻'汉寿亭侯墓'。"
+            },
+            {
+                name: "龙门石窟",
+                meta: "📍 洛龙区 | 🎫 90元 | ⏰ 4小时",
+                desc: "北魏至唐皇家石窟，虽非三国遗迹，但属同一文化脉络。宾阳三洞、万佛洞、卢舍那大佛为精华。电瓶车10元省体力。"
+            },
+            {
+                name: "汉魏洛阳城遗址",
+                meta: "📍 偃师区 | 🎫 免费 | ⏰ 2小时",
+                desc: "东汉、曹魏、西晋都城遗址，'铜驼荆棘'典故出处。可见永宁寺塔基、宫城遗址。建议请导游讲解，否则只能看土丘。"
+            }
+        ],
+        budget: [
+            { item: "往返高铁", cost: "1000元" },
+            { item: "住宿（2晚）", cost: "400-800元" },
+            { item: "门票", cost: "165元" },
+            { item: "当地交通", cost: "150-200元" },
+            { item: "餐饮", cost: "400-600元" },
+            { item: "合计", cost: "2200-3200元", total: true }
+        ],
+        tips: [
+            "洛阳博物馆需提前3天在公众号预约，周一闭馆",
+            "龙门石窟建议请讲解（200元/团），否则看不懂",
+            "关林每年9月有国际朝圣大典，如碰上体验更佳",
+            "洛阳水席菜量极大，两人点2-3道菜足够",
+            "汉魏洛阳城遗址偏远，建议打车往返（约80元）"
+        ]
+    },
+    
+    4: {
+        name: "曹魏双城·许昌+洛阳",
+        theme: "曹操集团深度",
+        cities: "上海 → 许昌 → 洛阳",
+        transport: "🚄 高铁串联",
+        difficulty: "⭐⭐（轻松）",
+        totalBudget: "2800-3800元",
+        highlights: ["曹丞相府", "春秋楼", "关林", "龙门石窟"],
+        transportDetail: `
+            <strong>Day 1</strong>：上海虹桥 → 郑州东站（G360，08:36-12:54，约4小时，票价447元）<<br>
+            郑州东站 → 许昌东站（城际列车，20分钟，约40元）<<br>
+            <strong>Day 4</strong>：洛阳龙门站 → 上海虹桥（G1934，15:00-20:30）<<br>
+            <strong>当地交通</strong>：许昌景点集中可打车；洛阳景点分散建议包车或打车
+        `,
+        days: [
+            {
+                title: "Day 1（抵达日）· 许昌初印象",
+                content: `
+                    <span class="time-slot">14:00前</span> 抵达许昌，入住酒店（曹魏古城附近）<<br><br>
+                    <span class="time-slot">15:00-17:30</span> <strong>曹丞相府</strong>（门票60元）<<br>
+                    曹操迎汉献帝都许后府邸原址重建。重点：求贤堂（唯才是举）、议事堂、藏兵洞（地下防御工事，必体验）。<<br><br>
+                    <span class="time-slot">18:00-20:00</span> <strong>曹魏古城夜游</strong><br>
+                    护城河散步，吃许昌烩面、胡辣汤。
+                `
+            },
+            {
+                title: "Day 2（许昌）· 关羽与曹操",
+                content: `
+                    <span class="time-slot">08:30-10:30</span> <strong>春秋楼</strong>（门票25元）<<br>
+                    关羽降曹后夜读《春秋》处，甘糜二夫人居处。看雷池（关羽不越界限）、刀楼印楼。<br><br>
+                    <span class="time-slot">11:00-12:30</span> <strong>灞陵桥</strong>（门票30元）<<br>
+                    关羽辞曹挑袍处，距春秋楼很近。有清代码头遗址。<br><br>
+                    <span class="time-slot">14:00-17:00</span> <strong>许昌博物馆</strong>（免费）<<br>
+                    看汉代文物、曹操相关史料。<br><br>
+                    <span class="time-slot">17:30后</span> 高铁许昌东站 → 洛阳龙门站（约1小时，120元），住洛阳
+                `
+            },
+            {
+                title: "Day 3（洛阳）· 关林与龙门",
+                content: `
+                    <span class="time-slot">08:30-10:30</span> <strong>关林</strong>（门票40元）<<br>
+                    曹操葬关羽首级处，全国三大关庙之一。重点：关冢、石牌坊、大殿。<br><br>
+                    <span class="time-slot">11:00-15:00</span> <strong>龙门石窟</strong>（门票90元）<<br>
+                    卢舍那大佛、宾阳三洞。午餐在景区附近解决。<br><br>
+                    <span class="time-slot">16:00-18:00</span> <strong>丽景门+十字街</strong><br>
+                    老城漫步，晚餐吃洛阳水席。
+                `
+            },
+            {
+                title: "Day 4（返程日）· 汉魏遗风",
+                content: `
+                    <span class="time-slot">08:30-11:00</span> <strong>汉魏洛阳城遗址</strong>（免费）<<br>
+                    东汉、曹魏都城，铜驼大街遗址。<br><br>
+                    <span class="time-slot">11:30-13:00</span> <strong>白马寺</strong>（门票35元）<<br>
+                    中国第一古刹，东汉建立。<br><br>
+                    <span class="time-slot">14:00</span> 前往洛阳龙门站，返程回沪。
+                `
+            }
+        ],
+        spots: [
+            {
+                name: "曹丞相府",
+                meta: "📍 许昌魏都区 | 🎫 60元 | ⏰ 2.5小时",
+                desc: "曹操处理军国大事处原址重建。藏兵洞是亮点，地下立体防御体系，体验曹操军事智慧。晚上有《曹操》实景演出。"
+            },
+            {
+                name: "春秋楼",
+                meta: "📍 许昌魏都区 | 🎫 25元 | ⏰ 2小时",
+                desc: "关羽降曹后夜读《春秋》处。雷池是核心看点——关羽为避嫌，从不越池内宅一步。大关帝庙气势恢宏。"
+            },
+            {
+                name: "关林",
+                meta: "📍 洛阳洛龙区 | 🎫 40元 | ⏰ 2小时",
+                desc: "孙权送关羽首级于曹操，曹操以王侯礼葬于此。与当阳关陵（身躯）、解州关帝庙（故里）并称三大关庙。"
+            }
+        ],
+        budget: [
+            { item: "往返高铁", cost: "900-1100元" },
+            { item: "城际交通", cost: "200元" },
+            { item: "住宿（3晚）", cost: "600-1000元" },
+            { item: "门票", cost: "280元" },
+            { item: "当地交通", cost: "200-300元" },
+            { item: "餐饮", cost: "600-900元" },
+            { item: "合计", cost: "2800-3800元", total: true }
+        ],
+        tips: [
+            "许昌到洛阳高铁班次多，建议买下午17:00左右车次",
+            "曹丞相府藏兵洞需下楼梯，穿舒适鞋子",
+            "春秋楼和灞陵桥可买联票（50元），省5元",
+            "洛阳住宿选丽景门附近，晚上逛老城方便",
+            "如时间紧，汉魏洛阳城和白马寺二选一即可"
+        ]
+    },
+    
+    5: {
+        name: "蜀汉北线·汉中+西安",
+        theme: "刘备集团（蜀汉）",
+        cities: "上海 → 西安 → 汉中",
+        transport: "✈️ 飞机+🚄 高铁",
+        difficulty: "⭐⭐⭐（需体力）",
+        totalBudget: "3500-4500元",
+        highlights: ["武侯墓", "石门栈道", "拜将坛", "西安城墙"],
+        transportDetail: `
+            <strong>Day 1</strong>：上海浦东 → 西安咸阳（MU2169，08:15-10:55，约2.5小时）<<br>
+            <strong>Day 2-4</strong>：西安 ↔ 汉中（高铁1.5小时，票价97元，班次密集）<<br>
+            <strong>Day 5</strong>：西安咸阳 → 上海浦东（MU2170，17:00-19:35）<<br>
+            <strong>当地交通</strong>：汉中景点分散建议包车（300元/天）；西安地铁发达
+        `,
+        days: [
+            {
+                title: "Day 1（抵达日）· 西安中转",
+                content: `
+                    <span class="time-slot">11:30前</span> 抵达西安，入住酒店（西安北站附近方便次日去汉中）<<br><br>
+                    <span class="time-slot">14:00-17:00</span> <strong>西安城墙+回民街</strong><br>
+                    城墙骑行（门票54元，骑车45元），感受古都气势。回民街晚餐（羊肉泡馍、肉夹馍）。<<br><br>
+                    <span class="time-slot">19:30-20:30</span> <strong>钟鼓楼夜景</strong>（外观免费）<<br>
+                    西安地标，夜景拍摄绝佳。
+                `
+            },
+            {
+                title: "Day 2（汉中）· 汉家发祥地",
+                content: `
+                    <span class="time-slot">08:00-09:30</span> 西安北站 → 汉中站（高铁）<<br><br>
+                    <span class="time-slot">10:00-12:00</span> <strong>拜将坛+汉中博物馆</strong>（免费）<<br>
+                    刘邦拜韩信为大将处，了解汉中作为蜀汉根基的历史。<br><br>
+                    <span class="time-slot">14:00-17:00</span> <strong>石门栈道</strong>（门票70元）<<br>
+                    "明修栈道，暗度陈仓"发生地，褒斜道咽喉。走仿古栈道，看摩崖石刻。<br><br>
+                    <span class="time-slot">17:30后</span> 汉中市区晚餐（热面皮、菜豆腐、核桃馍）
+                `
+            },
+            {
+                title: "Day 3（勉县）· 丞相千古",
+                content: `
+                    <span class="time-slot">08:00</span> 汉中汽车站 → 勉县（班车1小时，15元）<<br><br>
+                    <span class="time-slot">09:30-11:30</span> <strong>武侯墓</strong>（门票60元）<<br>
+                    诸葛亮真身安葬地，定军山下。千年古柏54株象征54年寿命，双桂流芳。<br><br>
+                    <span class="time-slot">12:00-13:00</span> <strong>勉县武侯祠</strong>（门票50元）<<br>
+                    比成都武侯祠更早修建，天下武侯祠之母。<br><br>
+                    <span class="time-slot">14:00-15:00</span> <strong>马超墓</strong>（门票20元）<<br>
+                    距武侯祠1公里，蜀汉五虎将之一。<br><br>
+                    <span class="time-slot">16:00</span> 返回汉中市区
+                `
+            },
+            {
+                title: "Day 4（汉中+返程西安）· 古战场",
+                content: `
+                    <span class="time-slot">08:30-11:30</span> <strong>定军山</strong>（免费，可选）<<br>
+                    黄忠斩夏侯渊处，诸葛亮遗命葬于此山。需爬山，体力不好可省略。<br><br>
+                    <span class="time-slot">12:00-13:00</span> 午餐后高铁返回西安<br><br>
+                    <span class="time-slot">15:00-17:30</span> <strong>陕西历史博物馆</strong>（免费，需预约）<<br>
+                    看汉代文物、三国时期器物。<br><br>
+                    <span class="time-slot">18:00后</span> 大唐不夜城夜游（免费）
+                `
+            },
+            {
+                title: "Day 5（返程日）· 西安最后印象",
+                content: `
+                    <span class="time-slot">08:30-10:30</span> <strong>大雁塔+大慈恩寺</strong>（门票40元，可选）<<br>
+                    玄奘译经处，唐代建筑。<br><br>
+                    <span class="time-slot">11:00-12:30</span> 午餐（长安大排档，网红陕菜）<<br><br>
+                    <span class="time-slot">14:00</span> 前往机场，结束旅程。
+                `
+            }
+        ],
+        spots: [
+            {
+                name: "汉中石门栈道",
+                meta: "📍 汉中汉台区 | 🎫 70元 | ⏰ 3小时",
+                desc: "刘备称汉中王之地，'明修栈道，暗度陈仓'发生地。褒斜道咽喉，仿古栈道行走体验极佳。石门摩崖石刻是书法圣地。"
+            },
+            {
+                name: "勉县武侯墓",
+                meta: "📍 汉中勉县 | 🎫 60元 | ⏰ 2小时",
+                desc: "诸葛亮真身安葬地，'因山为坟，冢足容棺'。古柏54株象征其54岁寿命，氛围肃穆庄重。清明前后有民间祭祀活动。"
+            },
+            {
+                name: "马超墓",
+                meta: "📍 汉中勉县 | 🎫 20元 | ⏰ 1小时",
+                desc: "蜀汉五虎将马超墓，距武侯祠仅1公里。规模不大但保存完好，可与武侯祠、武侯墓串联游览。"
+            }
+        ],
+        budget: [
+            { item: "往返机票", cost: "1200-1600元" },
+            { item: "西安-汉中高铁", cost: "200元" },
+            { item: "住宿（4晚）", cost: "1000-1600元" },
+            { item: "门票", cost: "300元" },
+            { item: "当地交通", cost: "400-600元" },
+            { item: "餐饮", cost: "700-900元" },
+            { item: "合计", cost: "3500-4500元", total: true }
+        ],
+        tips: [
+            "汉中到勉县班车在汉中汽车站乘坐，班次密集",
+            "定军山免费但需爬山，如体力有限可只看武侯墓",
+            "西安到汉中高铁过秦岭，风景极美，选靠窗座位",
+            "汉中热面皮是早餐首选，街边小店比酒店好吃",
+            "陕西历史博物馆需提前7天在公众号抢票，极难约"
+        ]
+    },
+    
+    6: {
+        name: "蜀汉深度·成都+广元+汉中",
+        theme: "刘备集团深度",
+        cities: "上海 → 成都 → 广元 → 汉中",
+        transport: "✈️ 飞机+🚄 高铁",
+        difficulty: "⭐⭐⭐⭐（较累）",
+        totalBudget: "4500-6000元",
+        highlights: ["武侯祠", "剑门关", "石门栈道", "武侯墓"],
+        transportDetail: `
+            <strong>Day 1</strong>：上海浦东 → 成都双流（上午航班）<<br>
+            <strong>Day 3</strong>：成都东站 → 广元站（高铁1.5小时，111元）<<br>
+            <strong>Day 4</strong>：广元 → 汉中（高铁1小时，78元）<<br>
+            <strong>Day 6</strong>：汉中 → 西安北站（高铁1.5小时），西安飞上海<br>
+            <strong>当地交通</strong>：剑门关建议包车；其他城市打车+公交
+        `,
+        days: [
+            {
+                title: "Day 1（成都）· 君臣合祀",
+                content: `
+                    <span class="time-slot">10:00前</span> 抵达成都，入住武侯祠附近酒店<br><br>
+                    <span class="time-slot">10:30-13:00</span> <strong>武侯祠</strong>（门票50元）<<br>
+                    刘备殿、诸葛亮殿、惠陵、三绝碑。<br><br>
+                    <span class="time-slot">13:00-15:00</span> 锦里古街午餐+闲逛<br><br>
+                    <span class="time-slot">15:30-17:30</span> <strong>杜甫草堂</strong>（门票50元）<<br>
+                    <span class="time-slot">18:00后</span> 宽窄巷子晚餐
+                `
+            },
+            {
+                title: "Day 2（成都）· 国宝与休闲",
+                content: `
+                    <span class="time-slot">07:30-11:00</span> <strong>大熊猫繁育基地</strong>（门票55元）<<br>
+                    看花花等明星熊猫，必须早到。<br><br>
+                    <span class="time-slot">11:30-13:00</span> 午餐（翘脚牛肉）<<br><br>
+                    <span class="time-slot">14:00-16:00</span> <strong>金沙遗址博物馆</strong>（门票70元）<<br>
+                    太阳神鸟出土地，古蜀文明。<br><br>
+                    <span class="time-slot">17:00后</span> 人民公园鹤鸣茶社喝茶，体验成都慢生活
+                `
+            },
+            {
+                title: "Day 3（广元）· 天下雄关",
+                content: `
+                    <span class="time-slot">08:00-09:30</span> 成都东站 → 广元站（高铁）<<br><br>
+                    <span class="time-slot">10:00-16:00</span> <strong>剑门关</strong>（门票105元）<<br>
+                    诸葛亮设关，姜维守关处。建议路线：北门→鸟道→玻璃栈道→关楼→南门。<br>
+                    午餐在山顶吃剑门豆腐宴。<br><br>
+                    <span class="time-slot">17:00后</span> 广元市区住宿，晚餐（女皇蒸凉面）
+                `
+            },
+            {
+                title: "Day 4（汉中）· 汉家发祥地",
+                content: `
+                    <span class="time-slot">08:00-09:00</span> 广元 → 汉中（高铁）<<br><br>
+                    <span class="time-slot">10:00-12:00</span> <strong>拜将坛+汉中博物馆</strong><br>
+                    <span class="time-slot">14:00-17:00</span> <strong>石门栈道</strong>（门票70元）<<br>
+                    走仿古栈道，看摩崖石刻。<br><br>
+                    <span class="time-slot">17:30后</span> 汉中市区晚餐（热面皮、核桃馍）
+                `
+            },
+            {
+                title: "Day 5（勉县）· 丞相千古",
+                content: `
+                    <span class="time-slot">08:00</span> 汉中 → 勉县（班车1小时）<<br><br>
+                    <span class="time-slot">09:30-11:30</span> <strong>武侯墓</strong>（门票60元）<<br>
+                    定军山下，诸葛亮真身墓。<br><br>
+                    <span class="time-slot">12:00-13:00</span> <strong>勉县武侯祠</strong>（门票50元）<<br>
+                    <span class="time-slot">14:00-15:00</span> <strong>马超墓</strong>（门票20元）<<br><br>
+                    <span class="time-slot">16:00</span> 返回汉中市区
+                `
+            },
+            {
+                title: "Day 6（返程）· 西安中转",
+                content: `
+                    <span class="time-slot">08:00-09:30</span> 汉中 → 西安北站（高铁）<<br><br>
+                    <span class="time-slot">10:30-12:30</span> 西安钟楼+回民街午餐（羊肉泡馍）<<br><br>
+                    <span class="time-slot">14:00</span> 前往西安咸阳机场，飞回上海。<br>
+                    <em>如航班晚，可追加陕西历史博物馆（需预约）。</em>
+                `
+            }
+        ],
+        spots: [
+            {
+                name: "剑门关",
+                meta: "📍 广元剑阁县 | 🎫 105元 | ⏰ 5-6小时",
+                desc: "诸葛亮设关屯兵，姜维3万拒钟会10万大军。鸟道/猿猱道绝壁攀爬惊险刺激，关楼雄伟。山顶豆腐宴必尝。"
+            },
+            {
+                name: "汉中石门栈道",
+                meta: "📍 汉中汉台区 | 🎫 70元 | ⏰ 3小时",
+                desc: "刘备称汉中王之地，'明修栈道，暗度陈仓'发生地。褒斜道咽喉，仿古栈道行走体验极佳，摩崖石刻是书法圣地。"
+            },
+            {
+                name: "勉县武侯墓",
+                meta: "📍 汉中勉县 | 🎫 60元 | ⏰ 2小时",
+                desc: "诸葛亮真身安葬地，'因山为坟'。千年古柏54株象征54岁寿命，双桂流芳。氛围肃穆，清明前后有祭祀活动。"
+            }
+        ],
+        budget: [
+            { item: "上海-成都机票", cost: "800-1200元" },
+            { item: "西安-上海机票", cost: "600-900元" },
+            { item: "高铁（成都-广元-汉中-西安）", cost: "300元" },
+            { item: "住宿（5晚）", cost: "1500-2500元" },
+            { item: "门票", cost: "500元" },
+            { item: "当地交通", cost: "500-700元" },
+            { item: "餐饮", cost: "900-1200元" },
+            { item: "合计", cost: "4500-6000元", total: true }
+        ],
+        tips: [
+            "剑门关体力消耗大，建议安排在精力最充沛的一天",
+            "鸟道惊险，有心脏病/恐高症者选缆车路线",
+            "广元到汉中高铁过秦岭，风景绝美，务必选靠窗座",
+            "汉中热面皮是早餐首选，街边小店比酒店正宗",
+            "此路线涉及多次高铁中转，建议提前买好联程票"
+        ]
+    },
+    
+    7: {
+        name: "魏蜀大环线·完整穿越",
+        theme: "魏蜀两国全景",
+        cities: "上海 → 成都 → 广元 → 汉中 → 西安 → 洛阳 → 许昌",
+        transport: "✈️ 飞机+🚄 高铁",
+        difficulty: "⭐⭐⭐⭐（深度游）",
+        totalBudget: "6000-8500元",
+        highlights: ["武侯祠", "剑门关", "武侯墓", "关林", "曹丞相府"],
+        transportDetail: `
+            <strong>Day 1</strong>：上海浦东 → 成都双流（上午航班）<<br>
+            <strong>Day 3</strong>：成都东站 → 广元站（高铁1.5小时）<<br>
+            <strong>Day 4</strong>：广元 → 汉中（高铁1小时）<<br>
+            <strong>Day 5</strong>：汉中 → 西安北站（高铁1.5小时）<<br>
+            <strong>Day 6</strong>：西安北站 → 洛阳龙门站（高铁1.5小时）<<br>
+            <strong>Day 7</strong>：洛阳龙门站 → 许昌东站（高铁1小时）<<br>
+            <strong>Day 8</strong>：许昌 → 郑州东站（高铁20分钟），郑州飞上海<br>
+            <strong>当地交通</strong>：建议包车或打车，行李可寄存在酒店
+        `,
+        days: [
+            {
+                title: "Day 1（成都）· 蜀汉心脏",
+                content: `
+                    <span class="time-slot">10:00前</span> 抵达成都<br><br>
+                    <span class="time-slot">10:30-13:00</span> <strong>武侯祠</strong>（门票50元）<<br>
+                    刘备惠陵、诸葛亮殿、三绝碑。<br><br>
+                    <span class="time-slot">13:00-15:00</span> 锦里古街午餐<br><br>
+                    <span class="time-slot">15:30-17:30</span> <strong>杜甫草堂</strong>（门票50元）<<br>
+                    <span class="time-slot">18:00后</span> 宽窄巷子晚餐
+                `
+            },
+            {
+                title: "Day 2（成都）· 国宝与古蜀",
+                content: `
+                    <span class="time-slot">07:30-11:00</span> <strong>大熊猫繁育基地</strong>（门票55元）<<br><br>
+                    <span class="time-slot">14:00-16:00</span> <strong>金沙遗址博物馆</strong>（门票70元）<<br><br>
+                    <span class="time-slot">17:00后</span> 人民公园鹤鸣茶社
+                `
+            },
+            {
+                title: "Day 3（广元）· 剑门雄关",
+                content: `
+                    <span class="time-slot">08:00-09:30</span> 成都 → 广元（高铁）<<br><br>
+                    <span class="time-slot">10:00-16:00</span> <strong>剑门关全天</strong>（门票105元）<<br>
+                    鸟道→玻璃栈道→关楼→南门。山顶豆腐宴午餐。<br><br>
+                    <span class="time-slot">17:00后</span> 广元市区住宿
+                `
+            },
+            {
+                title: "Day 4（汉中+勉县）· 丞相遗风",
+                content: `
+                    <span class="time-slot">08:00-09:00</span> 广元 → 汉中（高铁）<<br><br>
+                    <span class="time-slot">10:00-12:00</span> <strong>拜将坛+汉中博物馆</strong><br><br>
+                    <span class="time-slot">13:00-15:00</span> 汉中 → 勉县（班车），<<strong>武侯墓</strong>（门票60元）<<br><br>
+                    <span class="time-slot">15:30-16:30</span> <strong>勉县武侯祠</strong>（门票50元）<<br><br>
+                    <span class="time-slot">17:00</span> 返回汉中市区
+                `
+            },
+            {
+                title: "Day 5（西安）· 汉唐过渡",
+                content: `
+                    <span class="time-slot">08:00-09:30</span> 汉中 → 西安北站（高铁）<<br><br>
+                    <span class="time-slot">10:30-12:30</span> <strong>陕西历史博物馆</strong>（免费，需预约）<<br><br>
+                    <span class="time-slot">14:00-16:00</span> <strong>西安城墙骑行</strong>（门票54元）<<br><br>
+                    <span class="time-slot">17:00后</span> 回民街晚餐，钟鼓楼夜景
+                `
+            },
+            {
+                title: "Day 6（洛阳）· 曹魏东都",
+                content: `
+                    <span class="time-slot">08:00-09:30</span> 西安北站 → 洛阳龙门站（高铁）<<br><br>
+                    <span class="time-slot">10:30-12:30</span> <strong>关林</strong>（门票40元）<<br>
+                    曹操葬关羽首级处。<br><br>
+                    <span class="time-slot">14:00-17:30</span> <strong>龙门石窟</strong>（门票90元）<<br><br>
+                    <span class="time-slot">18:00后</span> 丽景门+十字街晚餐（洛阳水席）
+                `
+            },
+            {
+                title: "Day 7（许昌）· 曹操故里",
+                content: `
+                    <span class="time-slot">08:00-09:00</span> 洛阳 → 许昌（高铁）<<br><br>
+                    <span class="time-slot">09:30-12:00</span> <strong>曹丞相府</strong>（门票60元）<<br>
+                    求贤堂、议事堂、藏兵洞。<br><br>
+                    <span class="time-slot">14:00-16:00</span> <strong>春秋楼+灞陵桥</strong>（联票50元）<<br>
+                    关羽夜读春秋、辞曹挑袍处。<br><br>
+                    <span class="time-slot">17:00后</span> 曹魏古城夜游
+                `
+            },
+            {
+                title: "Day 8（返程）· 结束旅程",
+                content: `
+                    <span class="time-slot">08:30-10:30</span> 许昌博物馆（免费）<<br><br>
+                    <span class="time-slot">11:00</span> 许昌东站 → 郑州东站（高铁20分钟）<<br><br>
+                    <span class="time-slot">14:00</span> 郑州新郑机场 → 上海浦东<br>
+                    结束完整魏蜀穿越之旅。
+                `
+            }
+        ],
+        spots: [
+            {
+                name: "剑门关",
+                meta: "📍 广元剑阁县 | 🎫 105元 | ⏰ 5-6小时",
+                desc: "诸葛亮设关，姜维守关处。鸟道绝壁攀爬惊险，关楼雄伟，山顶豆腐宴必尝。"
+            },
+            {
+                name: "勉县武侯墓",
+                meta: "📍 汉中勉县 | 🎫 60元 | ⏰ 2小时",
+                desc: "诸葛亮真身墓，定军山下。古柏54株象征54岁寿命，氛围肃穆庄重。"
+            },
+            {
+                name: "关林",
+                meta: "📍 洛阳洛龙区 | 🎫 40元 | ⏰ 2小时",
+                desc: "曹操以王侯礼葬关羽首级处。全国三大关庙之一，9月有国际朝圣大典。"
+            },
+            {
+                name: "曹丞相府",
+                meta: "📍 许昌魏都区 | 🎫 60元 | ⏰ 2.5小时",
+                desc: "曹操迎汉献帝都许后府邸。藏兵洞是亮点，地下立体防御体系，晚上有实景演出。"
+            }
+        ],
+        budget: [
+            { item: "上海-成都机票", cost: "800-1200元" },
+            { item: "郑州-上海机票", cost: "600-900元" },
+            { item: "全程高铁", cost: "600元" },
+            { item: "住宿（7晚）", cost: "2100-3500元" },
+            { item: "门票", cost: "700元" },
+            { item: "当地交通", cost: "800-1000元" },
+            { item: "餐饮", cost: "1400-1800元" },
+            { item: "合计", cost: "6000-8500元", total: true }
+        ],
+        tips: [
+            "此路线涉及8城转换，建议精简行李，使用背包而非行李箱",
+            "陕西历史博物馆需提前7天抢票，是整个路线最难预约的景点",
+            "剑门关和龙门石窟体力消耗大，建议穿专业徒步鞋",
+            "洛阳到许昌高铁班次较少，建议提前3天购票",
+            "如时间紧张，可删减西安城墙、金沙遗址等次要景点",
+            "全程酒店建议选高铁站附近，方便次日出发"
+        ]
+    }
+};
+
+// 生成路线函数
+function generateRoute(days) {
+    // 更新按钮状态
+    document.querySelectorAll('.day-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if(btn.textContent.includes(days + '天') || (days === 7 && btn.textContent.includes('7天+'))) {
+            btn.classList.add('active');
+        }
+    });
+    
+    const route = routeDatabase[days];
+    const container = document.getElementById('route-content');
+    
+    // 生成景点HTML
+    let spotsHtml = '';
+    route.spots.forEach(spot => {
+        spotsHtml += `
+            <div class="spot-card">
+                <div class="spot-img">[${spot.name}]<<br>景点照片</div>
+                <div class="spot-info">
+                    <h4>${spot.name}</h4>
+                    <div class="spot-meta">${spot.meta}</div>
+                    <div class="spot-desc">${spot.desc}</div>
+                </div>
+            </div>
+        `;
+    });
+    
+    // 生成日程HTML
+    let daysHtml = '';
+    route.days.forEach(day => {
+        daysHtml += `
+            <div class="day-card">
+                <div class="day-title">${day.title}</div>
+                <div class="day-content">${day.content}</div>
+            </div>
+        `;
+    });
+    
+    // 生成预算HTML
+    let budgetHtml = '';
+    route.budget.forEach(item => {
+        const isTotal = item.total ? 'style="background:#fff8f0;font-weight:bold;color:#8B0000;"' : '';
+        budgetHtml += `
+            <tr ${isTotal}>
+                <td>${item.item}</td>
+                <td>${item.cost}</td>
+            </tr>
+        `;
+    });
+    
+    // 生成提示HTML
+    let tipsHtml = '';
+    route.tips.forEach(tip => {
+        tipsHtml += `<li>${tip}</li>`;
+    });
+    
+    // 组装完整页面
+    container.innerHTML = `
+        <div class="page">
+            <div class="route-header">
+                <div class="route-name">${route.name}</div>
+                <div class="route-meta">
+                    <span class="route-tag">主题：${route.theme}</span>
+                    <span class="route-tag">路线：${route.cities}</span>
+                    <span class="route-tag">交通：${route.transport}</span>
+                    <span class="route-tag">难度：${route.difficulty}</span>
+                </div>
+            </div>
+            
+            <div class="transport-box">
+                <div class="transport-title">🚄 上海出发交通方案</div>
+                <div class="transport-detail">${route.transportDetail}</div>
+            </div>
+            
+            <h3 style="color:#8B0000;border-left:4px solid #DAA520;padding-left:10px;margin:15px 0;">📅 每日行程规划</h3>
+            ${daysHtml}
+        </div>
+        
+        <div class="page">
+            <h3 style="color:#8B0000;border-left:4px solid #DAA520;padding-left:10px;margin:15px 0;">📍 核心景点详解</h3>
+            <div class="spots-grid">
+                ${spotsHtml}
+            </div>
+            
+            <h3 style="color:#8B0000;border-left:4px solid #DAA520;padding-left:10px;margin:20px 0 10px 0;">💰 预算明细</h3>
+            <table class="budget-table">
+                <tr><th>项目</th><th>费用（人均）</th></tr>
+                ${budgetHtml}
+            </table>
+            
+            <div class="tips-box">
+                <div class="tips-title">⚠️ 实用贴士</div>
+                <ul>${tipsHtml}</ul>
+            </div>
+            
+            <div style="background:#f0f8ff;border:1px solid #4682B4;padding:12px;border-radius:8px;margin-top:15px;font-size:13px;">
+                <strong>💡 保存建议：</strong>点击顶部"保存为PDF"按钮，或按Ctrl+P打印。建议打印后随身携带，随时查阅。
+            </div>
+        </div>
+    `;
+    
+    // 滚动到内容区
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// 页面加载时默认生成2天路线
+window.onload = function() {
+    generateRoute(2);
+};
+</script>
+
+</body>
+</html>

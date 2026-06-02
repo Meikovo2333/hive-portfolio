@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>作品集 | AI 产品经理</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #121E1E;
+            --bg-card: #1A2A2A;
+            --bg-surface: #1E3232;
+            --bg-hover: #243838;
+            --accent: #3AC1B3;
+            --accent-dim: #2A9D8F;
+            --accent-glow: rgba(58, 193, 179, 0.15);
+            --text-primary: #E8F0F0;
+            --text-secondary: #9BA8A8;
+            --text-muted: #5A6A6A;
+            --border-subtle: rgba(90, 106, 106, 0.25);
+            --border-active: rgba(58, 193, 179, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.7;
+        }
+
+        /* Header */
+        header {
+            padding: 80px 40px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--accent);
+            border: 1px solid var(--border-active);
+            margin-bottom: 24px;
+            letter-spacing: 1px;
+        }
+
+        h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+        }
+
+        .accent { color: var(--accent); }
+
+        .subtitle {
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .highlights {
+            display: flex;
+            gap: 32px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .highlight {
+            text-align: center;
+        }
+
+        .highlight .num {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .highlight .label {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Section */
+        section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 32px;
+        }
+
+        /* Project Grid */
+        .projects {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(520px, 1fr));
+            gap: 24px;
+        }
+
+        .project-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 32px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .project-card:hover {
+            border-color: var(--border-active);
+            box-shadow: 0 0 30px var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .project-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .project-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .project-tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--accent-glow);
+            color: var(--accent);
+            white-space: nowrap;
+        }
+
+        .project-desc {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        .project-meta {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .meta-item svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .arrow {
+            margin-left: auto;
+            color: var(--accent);
+            font-size: 20px;
+            transition: transform 0.2s ease;
+        }
+
+        .project-card:hover .arrow {
+            transform: translateX(4px);
+        }
+
+        /* Skills */
+        .skills-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .skill-tag {
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            background: var(--bg-surface);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-subtle);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 60px 40px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 32px; }
+            .projects { grid-template-columns: 1fr; }
+            .highlights { gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="badge">AI 产品经理 · 从 0 到 1 产品规划</div>
+        <h1>Hive 平台 <span class="accent">产品设计</span> 作品集</h1>
+        <p class="subtitle">
+            负责 AI 多智能体协作平台 Hive 的全链路产品设计，覆盖业务流程、创作者中心、工作页面、个人中心、数据埋点等核心模块。
+        </p>
+        <div class="highlights">
+            <div class="highlight">
+                <div class="num">9</div>
+                <div class="label">核心页面</div>
+            </div>
+            <div class="highlight">
+                <div class="num">6</div>
+                <div class="label">功能模块</div>
+            </div>
+            <div class="highlight">
+                <div class="num">5+</div>
+                <div class="label">动态原型</div>
+            </div>
+            <div class="highlight">
+                <div class="num">20+</div>
+                <div class="label">数据埋点</div>
+            </div>
+        </div>
+    </header>
+
+    <section>
+        <div class="section-title">项目原型</div>
+        <div class="projects">
+
+            <a class="project-card" href="./hive-workspace.html">
+                <div class="project-header">
+                    <div>
+                        <div class="project-title">工作页面 Workspace</div>
+                    </div>
+                    <span class="project-tag">核心场景</span>
+                </div>
+                <p class="project-desc">
+                    项目执行监控核心页面。包含 Manager 办公桌（全局总览）、办公楼平面图（Agent 团队空间隐喻可视化）、Task Graph（任务依赖网络）、时间线（工期规划）、格子间内部抽屉（Agent 详情下钻）、团队邮箱中心（沟通记录）。支持精灵球轻咨询。
+                </p>
+                <div class="project-meta">
+                    <span class="meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        6 大核心模块
+                    </span>
+                    <span class="meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        空间隐喻设计
+                    </span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a class="project-card" href="./hive-creator-onboarding.html">
+                <div class="project-header">
+                    <div>
+                        <div class="project-title">创作者中心 Creator Center</div>
+                    </div>
+                    <span class="project-tag">从 0 到 1</span>
+                </div>
+                <p class="project-desc">
+                    面向内容创作者的完整后台系统。包含概览 Dashboard、我的技能、技能详情、财务中心、数据中心、账号设置、偏好设置、帮助中心、升级页面。设计三级账号等级体系（FREE/PRO/MAX），完成创作者商业化路径设计。
+                </p>
+                <div class="project-meta">
+                    <span class="meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        9 个核心页面
+                    </span>
+                    <span class="meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        商业化设计
+                    </span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a class="project-card" href="./hive-profile-design.html">
+                <div class="project-header">
+                    <div>
+                        <div class="project-title">个人中心 Profile</div>
+                    </div>
+                    <span class="project-tag">双角色架构</span>
+                </div>
+                <p class="project-desc">
+                    用户个人中心与创作者个人中心双角色体系。支持角色切换与权限隔离，覆盖个人信息、账户与账单、设置、帮助中心、数据概览、我的 Skill、收益管理、创作者设置等 9 个功能模块。输出完整 Design Tokens 设计规范。
+                </p>
+                <div class="project-meta">
+                    <span class="meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        双角色体系
+                    </span>
+                    <span class="meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        Design Tokens
+                    </span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+            <a class="project-card" href="./sanguo.html">
+                <div class="project-header">
+                    <div>
+                        <div class="project-title">魏蜀三国圣地巡礼攻略生成器</div>
+                    </div>
+                    <span class="project-tag">独立项目</span>
+                </div>
+                <p class="project-desc">
+                    使用 AI 工具独立完成的旅游攻略生成工具。支持选择三国阵营（魏/蜀）、出行日期、游玩天数，自动生成包含行程规划、景点推荐、预算估算的完整攻略文档，支持打印导出。
+                </p>
+                <div class="project-meta">
+                    <span class="meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        AI 生成内容
+                    </span>
+                    <span class="meta-item">
+                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                        打印导出
+                    </span>
+                    <span class="arrow">→</span>
+                </div>
+            </a>
+
+        </div>
+    </section>
+
+    <section>
+        <div class="section-title">工具能力</div>
+        <div class="skills-grid">
+            <span class="skill-tag">Claude Code</span>
+            <span class="skill-tag">Kimi</span>
+            <span class="skill-tag">Marvis</span>
+            <span class="skill-tag">Qoder</span>
+            <span class="skill-tag">MiniMax</span>
+            <span class="skill-tag">Figma</span>
+            <span class="skill-tag">HTML/CSS 原型</span>
+            <span class="skill-tag">PRD 撰写</span>
+            <span class="skill-tag">数据埋点</span>
+            <span class="skill-tag">竞品分析</span>
+            <span class="skill-tag">业务流程设计</span>
+            <span class="skill-tag">UI/UX 设计</span>
+        </div>
+    </section>
+
+    <footer>
+        <p>使用 Claude Code + Figma 构建 · 从需求到原型的全链路设计能力</p>
+    </footer>
+
+</body>
+</html>

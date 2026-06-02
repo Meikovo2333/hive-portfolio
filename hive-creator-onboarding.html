@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hive - 创作者中心</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #121E1E;
+            --bg-card: #1A2A2A;
+            --bg-surface: #1E3232;
+            --bg-hover: #243838;
+            --accent: #3AC1B3;
+            --accent-dim: #2A9D8F;
+            --accent-glow: rgba(58, 193, 179, 0.15);
+            --text-primary: #E8F0F0;
+            --text-secondary: #9BA8A8;
+            --text-muted: #5A6A6A;
+            --border-subtle: rgba(90, 106, 106, 0.25);
+            --border-active: rgba(58, 193, 179, 0.4);
+            --danger: #CF5B5B;
+            --success: #2BBB8A;
+            --warning: #CF9937;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* Top nav */
+        .top-nav {
+            height: 56px;
+            background: rgba(18, 30, 30, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 32px;
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+        }
+        .logo { font-size: 20px; font-weight: 700; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; }
+        .nav-right { display: flex; align-items: center; gap: 20px; }
+        .avatar-small {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 12px; cursor: pointer; border: 2px solid transparent;
+        }
+
+        /* Nav container */
+        .nav-container {
+            position: fixed;
+            top: 56px; left: 0; right: 0; z-index: 99;
+            background: rgba(18, 30, 30, 0.6);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .identity-bar { display: flex; gap: 8px; padding: 12px 40px 0; }
+        .identity-pill {
+            padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 500;
+            color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease;
+            border: 1px solid transparent; user-select: none;
+        }
+        .identity-pill:hover { color: var(--text-primary); border-color: var(--border-subtle); }
+        .identity-pill.active { background: var(--accent); color: var(--bg-base); border-color: var(--accent); }
+
+        .horizontal-nav { display: flex; gap: 4px; padding: 8px 40px 0; }
+        .nav-tab {
+            padding: 10px 20px; font-size: 14px; color: var(--text-secondary); cursor: pointer;
+            border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s ease;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .nav-tab:hover { color: var(--text-primary); }
+        .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        /* Main content */
+        .main-content { padding: 164px 40px 40px; max-width: 1200px; margin: 0 auto; }
+        .page-section { display: none; }
+        .page-section.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        .page-header { margin-bottom: 32px; }
+        .page-title { font-size: 28px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
+        .page-subtitle { font-size: 14px; color: var(--text-secondary); }
+
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: 16px; padding: 32px; margin-bottom: 24px;
+            position: relative; overflow: hidden;
+        }
+        .card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 3px; background: linear-gradient(90deg, var(--accent), transparent 60%);
+        }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .stat-card {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: 12px; padding: 20px; position: relative; overflow: hidden;
+        }
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, var(--accent), transparent); opacity: 0.5;
+        }
+        .stat-label {
+            font-family: 'JetBrains Mono', monospace; font-size: 10px;
+            text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 8px;
+        }
+        .stat-value { font-size: 24px; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono', monospace; }
+
+        .chart-placeholder {
+            height: 200px; background: var(--bg-surface); border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-muted); font-size: 13px; margin-top: 16px;
+        }
+
+        .skill-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .skill-card {
+            background: var(--bg-card); border: 1px solid var(--border-subtle);
+            border-radius: 12px; padding: 20px; opacity: 0.6;
+        }
+        .skill-card-header { display: flex; justify-content: space-between; margin-bottom: 12px; }
+        .skill-card-name { font-size: 15px; font-weight: 600; }
+        .skill-card-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text-muted); }
+
+        .feedback-item {
+            display: flex; gap: 12px; padding: 16px; background: var(--bg-surface);
+            border-radius: 10px; margin-bottom: 12px; opacity: 0.5;
+        }
+        .feedback-avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 12px; font-weight: 600; flex-shrink: 0;
+        }
+        .feedback-content { flex: 1; }
+        .feedback-user { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+        .feedback-text { font-size: 13px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 6px; }
+
+        .balance-card {
+            background: linear-gradient(135deg, rgba(58, 193, 179, 0.15), rgba(58, 193, 179, 0.05));
+            border: 1px solid var(--border-active); border-radius: 16px;
+            padding: 32px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
+        }
+
+        /* ===== Onboarding Overlay ===== */
+        .onboarding-overlay {
+            position: fixed; inset: 0; z-index: 1000;
+            display: none; align-items: center; justify-content: center;
+        }
+        .onboarding-overlay.active { display: flex; }
+
+        .onboarding-backdrop {
+            position: absolute; inset: 0;
+            background: rgba(18, 30, 30, 0.35);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .onboarding-modal {
+            position: relative; z-index: 1;
+            width: 640px; max-width: 90vw;
+            max-height: 90vh; overflow-y: auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+            animation: modalIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.96) translateY(16px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Modal header banner */
+        .onboarding-header {
+            padding: 32px 40px 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .onboarding-header::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--accent-dim), var(--accent));
+        }
+        .onboarding-header::after {
+            content: ''; position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
+            width: 300px; height: 300px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(58, 193, 179, 0.12), transparent 70%);
+            pointer-events: none;
+        }
+        .onboarding-icon {
+            width: 56px; height: 56px; border-radius: 16px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 16px; font-size: 28px; box-shadow: 0 8px 32px rgba(58, 193, 179, 0.25);
+            position: relative; z-index: 1;
+        }
+        .onboarding-title {
+            font-size: 22px; font-weight: 700; margin-bottom: 6px;
+            position: relative; z-index: 1;
+        }
+        .onboarding-subtitle {
+            font-size: 14px; color: var(--text-secondary); line-height: 1.5;
+            position: relative; z-index: 1;
+        }
+
+        /* Earnings preview */
+        .onboarding-preview {
+            margin: 0 40px 24px;
+            background: linear-gradient(135deg, rgba(58, 193, 179, 0.12), rgba(58, 193, 179, 0.04));
+            border: 1px solid var(--border-active); border-radius: 16px;
+            padding: 28px 32px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: relative; overflow: hidden;
+        }
+        .onboarding-preview::before {
+            content: ''; position: absolute; top: -40px; right: -40px;
+            width: 160px; height: 160px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(58, 193, 179, 0.15), transparent 70%);
+            pointer-events: none;
+        }
+        .onboarding-preview-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
+        .onboarding-preview-value { font-size: 36px; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono', monospace; margin-bottom: 6px; }
+        .onboarding-preview-sub { font-size: 12px; color: var(--text-muted); }
+        .onboarding-preview-chart {
+            display: flex; align-items: flex-end; gap: 6px;
+            height: 56px; position: relative; z-index: 1;
+        }
+        .preview-bar {
+            width: 8px; border-radius: 4px;
+            background: rgba(58, 193, 179, 0.2);
+            transition: all 0.3s ease;
+        }
+        .preview-bar.active { background: var(--accent); box-shadow: 0 0 12px rgba(58, 193, 179, 0.4); }
+
+        /* Features grid */
+        .onboarding-features-title {
+            font-size: 13px; font-weight: 600; color: var(--text-secondary);
+            padding: 0 40px 12px; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .onboarding-features {
+            display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+            padding: 0 40px 32px;
+        }
+        .onboarding-feature {
+            display: flex; align-items: center; gap: 14px;
+            padding: 18px 20px;
+            background: var(--bg-surface); border-radius: 12px;
+            border: 1px solid transparent; transition: all 0.2s ease;
+        }
+        .onboarding-feature:hover { border-color: var(--border-subtle); }
+        .onboarding-feature-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: rgba(58, 193, 179, 0.1);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; flex-shrink: 0;
+        }
+        .onboarding-feature-name { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+        .onboarding-feature-desc { font-size: 12px; color: var(--text-muted); }
+
+        /* CTA */
+        .onboarding-cta {
+            padding: 0 40px 32px; text-align: center;
+        }
+        .onboarding-btn {
+            width: 100%; padding: 14px 28px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dim));
+            color: var(--bg-base); border: none; border-radius: 10px;
+            font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700;
+            cursor: pointer; transition: all 0.2s ease;
+            box-shadow: 0 4px 20px rgba(58, 193, 179, 0.3);
+        }
+        .onboarding-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 28px rgba(58, 193, 179, 0.4);
+        }
+        .onboarding-hint {
+            margin-top: 12px; font-size: 12px; color: var(--text-muted);
+        }
+
+        /* Close button */
+        .onboarding-close {
+            position: fixed; bottom: 40px; left: 40px; z-index: 1001;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: rgba(26, 42, 42, 0.8); border: 1px solid var(--border-subtle);
+            color: var(--text-secondary); font-size: 22px; cursor: pointer;
+            display: none; align-items: center; justify-content: center;
+            transition: all 0.2s ease; backdrop-filter: blur(10px);
+        }
+        .onboarding-close:hover {
+            background: var(--bg-hover); color: var(--text-primary); border-color: var(--border-active);
+        }
+        .onboarding-overlay.active ~ .onboarding-close,
+        .onboarding-overlay.active + .onboarding-close {
+            display: flex;
+        }
+        .onboarding-overlay.active ~ .onboarding-close { display: flex; }
+
+        .section-divider { display: flex; align-items: center; gap: 16px; margin: 32px 0 24px; }
+        .section-divider-line { flex: 1; height: 1px; background: var(--border-subtle); }
+        .section-divider-text {
+            font-family: 'JetBrains Mono', monospace; font-size: 10px;
+            text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top nav -->
+    <nav class="top-nav">
+        <div class="logo">HIVE</div>
+        <div class="nav-right">
+            <div class="avatar-small">M</div>
+        </div>
+    </nav>
+
+    <!-- Nav container -->
+    <div class="nav-container">
+        <div class="identity-bar">
+            <div class="identity-pill active" data-identity="user">用户</div>
+            <div class="identity-pill" data-identity="creator">创作者</div>
+        </div>
+
+        <!-- 用户二级菜单 -->
+        <div class="horizontal-nav" id="userTabs" style="display: flex;">
+            <div class="nav-tab active" data-page="profile">个人信息</div>
+            <div class="nav-tab" data-page="billing">账户与账单</div>
+            <div class="nav-tab" data-page="settings">设置</div>
+        </div>
+
+        <!-- 创作者二级菜单 -->
+        <div class="horizontal-nav" id="creatorTabs" style="display: none;">
+            <div class="nav-tab active" data-page="overview">概览</div>
+            <div class="nav-tab" data-page="skills">我的 Skill</div>
+            <div class="nav-tab" data-page="feedback">用户评价</div>
+            <div class="nav-tab" data-page="earnings">收益管理</div>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+
+        <!-- ===== 用户视角：个人信息 ===== -->
+        <div class="page-section active" data-page="profile" data-identity="user">
+            <div class="page-header">
+                <h1 class="page-title">个人信息</h1>
+                <p class="page-subtitle">管理你的 Hive 账户资料</p>
+            </div>
+            <div class="card">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 20px;">基本信息</div>
+                <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 24px;">
+                    <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent-dim)); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700;">M</div>
+                    <div>
+                        <div style="font-size: 18px; font-weight: 600; margin-bottom: 4px;">Mike</div>
+                        <div style="font-size: 13px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">UID: 8829-3910-2247</div>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 14px; color: var(--text-secondary);">
+                    <div>昵称: Mike</div>
+                    <div>邮箱: mike@example.com</div>
+                    <div>加入时间: 2024.03.15</div>
+                    <div>身份: 普通用户</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 用户视角：账户与账单 ===== -->
+        <div class="page-section" data-page="billing" data-identity="user">
+            <div class="page-header">
+                <h1 class="page-title">账户与账单</h1>
+                <p class="page-subtitle">查看消费记录与余额</p>
+            </div>
+            <div class="card">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">余额</div>
+                <div style="font-size: 36px; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono', monospace; margin-bottom: 8px;">¥128.50</div>
+                <div style="font-size: 13px; color: var(--text-muted);">本月消费 ¥45.00</div>
+            </div>
+        </div>
+
+        <!-- ===== 用户视角：设置 ===== -->
+        <div class="page-section" data-page="settings" data-identity="user">
+            <div class="page-header">
+                <h1 class="page-title">设置</h1>
+                <p class="page-subtitle">偏好与通知设置</p>
+            </div>
+            <div class="card">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">通知偏好</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-subtle);">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 500;">Skill 调用提醒</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">当 Skill 被调用时发送通知</div>
+                    </div>
+                    <div style="width: 44px; height: 24px; background: var(--accent); border-radius: 12px; position: relative;">
+                        <div style="position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; background: var(--text-primary); border-radius: 50%;"></div>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0;">
+                    <div>
+                        <div style="font-size: 14px; font-weight: 500;">收益到账提醒</div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">当收益到账时发送通知</div>
+                    </div>
+                    <div style="width: 44px; height: 24px; background: var(--bg-surface); border-radius: 12px; position: relative; border: 1px solid var(--border-subtle);">
+                        <div style="position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: var(--text-primary); border-radius: 50%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 创作者视角：概览（假数据背景） ===== -->
+        <div class="page-section" data-page="overview" data-identity="creator">
+            <div class="page-header">
+                <h1 class="page-title">创作者中心</h1>
+                <p class="page-subtitle">管理你的 Skill 与收益</p>
+            </div>
+            <div class="stats-grid">
+                <div class="stat-card"><div class="stat-label">累计调用</div><div class="stat-value">24,771</div></div>
+                <div class="stat-card"><div class="stat-label">累计收益</div><div class="stat-value">¥6,490</div></div>
+                <div class="stat-card"><div class="stat-label">Skill 数量</div><div class="stat-value">4</div></div>
+                <div class="stat-card"><div class="stat-label">平均评分</div><div class="stat-value">8.9</div></div>
+            </div>
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px;">
+                <div class="card" style="margin-bottom: 0;">
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">最近 30 天调用趋势</div>
+                    <div style="display: flex; align-items: flex-end; gap: 6px; height: 160px; padding: 10px 0;">
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.4), rgba(58,193,179,0.1)); border-radius: 4px 4px 0 0; height: 35%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.4), rgba(58,193,179,0.1)); border-radius: 4px 4px 0 0; height: 52%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.4), rgba(58,193,179,0.1)); border-radius: 4px 4px 0 0; height: 45%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.4), rgba(58,193,179,0.1)); border-radius: 4px 4px 0 0; height: 68%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.4), rgba(58,193,179,0.1)); border-radius: 4px 4px 0 0; height: 58%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.4), rgba(58,193,179,0.1)); border-radius: 4px 4px 0 0; height: 80%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.5), rgba(58,193,179,0.15)); border-radius: 4px 4px 0 0; height: 72%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.5), rgba(58,193,179,0.15)); border-radius: 4px 4px 0 0; height: 90%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.5), rgba(58,193,179,0.15)); border-radius: 4px 4px 0 0; height: 85%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.6), rgba(58,193,179,0.2)); border-radius: 4px 4px 0 0; height: 100%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 8px; font-family: 'JetBrains Mono', monospace;">
+                        <span>05-08</span><span>05-09</span><span>05-10</span><span>05-11</span><span>05-12</span><span>05-13</span><span>05-14</span><span>05-15</span><span>05-16</span><span>05-17</span>
+                    </div>
+                </div>
+                <div class="card" style="margin-bottom: 0;">
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">收益概览</div>
+                    <div style="margin-bottom: 16px;">
+                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">本周收益</div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono', monospace;">¥1,240</div>
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">本月收益</div>
+                        <div style="font-size: 24px; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono', monospace;">¥4,860</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 4px;">周环比</div>
+                        <div style="font-size: 16px; font-weight: 600; color: var(--success);">↑ +18.5%</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">活跃热力图</div>
+                <div style="display: flex; gap: 3px; flex-wrap: wrap;">
+                    <script>
+                        for (let row = 0; row < 7; row++) {
+                            for (let col = 0; col < 40; col++) {
+                                const rand = Math.random();
+                                let bg = 'var(--bg-surface)';
+                                if (rand > 0.5) bg = 'rgba(58,193,179,0.25)';
+                                if (rand > 0.7) bg = 'rgba(58,193,179,0.45)';
+                                if (rand > 0.85) bg = 'rgba(58,193,179,0.65)';
+                                if (rand > 0.95) bg = 'rgba(58,193,179,0.85)';
+                                document.write('<div style="width:12px;height:12px;border-radius:2px;background:' + bg + ';"></div>');
+                            }
+                        }
+                    </script>
+                </div>
+                <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 12px; font-size: 11px; color: var(--text-muted);">
+                    <span>少</span>
+                    <div style="display: flex; gap: 3px;">
+                        <div style="width:12px;height:12px;border-radius:2px;background:var(--bg-surface);"></div>
+                        <div style="width:12px;height:12px;border-radius:2px;background:rgba(58,193,179,0.25);"></div>
+                        <div style="width:12px;height:12px;border-radius:2px;background:rgba(58,193,179,0.45);"></div>
+                        <div style="width:12px;height:12px;border-radius:2px;background:rgba(58,193,179,0.65);"></div>
+                        <div style="width:12px;height:12px;border-radius:2px;background:rgba(58,193,179,0.85);"></div>
+                    </div>
+                    <span>多</span>
+                </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="card" style="margin-bottom: 0;">
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">最近动态</div>
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                        <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--success); margin-top: 6px; flex-shrink: 0;"></div>
+                            <div>
+                                <div style="font-size: 13px; color: var(--text-primary);">智能翻译助手被调用 <span style="color: var(--accent); font-family: 'JetBrains Mono', monospace;">1,204</span> 次</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">10 分钟前</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-top: 6px; flex-shrink: 0;"></div>
+                            <div>
+                                <div style="font-size: 13px; color: var(--text-primary);">数据分析大师收到新评价 ⭐ 9.0</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">32 分钟前</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--warning); margin-top: 6px; flex-shrink: 0;"></div>
+                            <div>
+                                <div style="font-size: 13px; color: var(--text-primary);">API 文档生成器状态变更为审核中</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">2 小时前</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 12px; align-items: flex-start;">
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: var(--success); margin-top: 6px; flex-shrink: 0;"></div>
+                            <div>
+                                <div style="font-size: 13px; color: var(--text-primary);">本周收益 ¥340 已结算到账</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">昨天</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="margin-bottom: 0;">
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">热门 Skill 排行</div>
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 24px; height: 24px; border-radius: 50%; background: rgba(58,193,179,0.15); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0;">1</div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 13px; font-weight: 500;">智能翻译助手</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 1px;">18,234 调用 · ¥3,420 收益</div>
+                            </div>
+                            <div style="font-size: 13px; color: var(--accent); font-family: 'JetBrains Mono', monospace;">9.2</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 24px; height: 24px; border-radius: 50%; background: rgba(58,193,179,0.1); color: var(--accent); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0;">2</div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 13px; font-weight: 500;">数据分析大师</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 1px;">12,105 调用 · ¥2,180 收益</div>
+                            </div>
+                            <div style="font-size: 13px; color: var(--accent); font-family: 'JetBrains Mono', monospace;">8.7</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 24px; height: 24px; border-radius: 50%; background: rgba(90,106,106,0.2); color: var(--text-muted); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0;">3</div>
+                            <div style="flex: 1;">
+                                <div style="font-size: 13px; font-weight: 500;">爬虫模板工具</div>
+                                <div style="font-size: 11px; color: var(--text-muted); margin-top: 1px;">5,432 调用 · ¥890 收益</div>
+                            </div>
+                            <div style="font-size: 13px; color: var(--accent); font-family: 'JetBrains Mono', monospace;">8.2</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 创作者视角：我的 Skill（假数据背景） ===== -->
+        <div class="page-section" data-page="skills" data-identity="creator">
+            <div class="page-header">
+                <h1 class="page-title">我的 Skill</h1>
+                <p class="page-subtitle">管理已发布的 Skill</p>
+            </div>
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px;">
+                <div class="card" style="margin-bottom: 0;">
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Skill 列表</div>
+                    <div class="skill-grid">
+                        <div class="skill-card">
+                            <div class="skill-card-header"><div class="skill-card-name">智能翻译助手</div><span style="font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(43,187,138,0.15);color:var(--success);">已上线</span></div>
+                            <div style="font-size: 12px; color: var(--accent); font-family: 'JetBrains Mono', monospace; margin-bottom: 8px;">AI 评分 9.2</div>
+                            <div class="skill-card-meta"><div>调用 <span style="color:var(--text-primary);font-weight:500;">18,234</span></div><div>收益 <span style="color:var(--text-primary);font-weight:500;">¥3,420</span></div></div>
+                            <div style="display: flex; gap: 6px; margin-top: 10px;">
+                                <span style="padding: 2px 8px; border-radius: 4px; font-size: 11px; background: rgba(58,193,179,0.1); color: var(--accent); border: 1px solid var(--border-active);">翻译</span>
+                                <span style="padding: 2px 8px; border-radius: 4px; font-size: 11px; background: rgba(58,193,179,0.1); color: var(--accent); border: 1px solid var(--border-active);">NLP</span>
+                            </div>
+                        </div>
+                        <div class="skill-card">
+                            <div class="skill-card-header"><div class="skill-card-name">数据分析大师</div><span style="font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(43,187,138,0.15);color:var(--success);">已上线</span></div>
+                            <div style="font-size: 12px; color: var(--accent); font-family: 'JetBrains Mono', monospace; margin-bottom: 8px;">AI 评分 8.7</div>
+                            <div class="skill-card-meta"><div>调用 <span style="color:var(--text-primary);font-weight:500;">12,105</span></div><div>收益 <span style="color:var(--text-primary);font-weight:500;">¥2,180</span></div></div>
+                            <div style="display: flex; gap: 6px; margin-top: 10px;">
+                                <span style="padding: 2px 8px; border-radius: 4px; font-size: 11px; background: rgba(58,193,179,0.1); color: var(--accent); border: 1px solid var(--border-active);">数据可视化</span>
+                                <span style="padding: 2px 8px; border-radius: 4px; font-size: 11px; background: rgba(58,193,179,0.1); color: var(--accent); border: 1px solid var(--border-active);">分析</span>
+                            </div>
+                        </div>
+                        <div class="skill-card">
+                            <div class="skill-card-header"><div class="skill-card-name">API 文档生成器</div><span style="font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(207,153,55,0.15);color:var(--warning);">审核中</span></div>
+                            <div style="font-size: 12px; color: var(--accent); font-family: 'JetBrains Mono', monospace; margin-bottom: 8px;">AI 评分 7.8</div>
+                            <div class="skill-card-meta"><div>调用 <span style="color:var(--text-primary);font-weight:500;">-</span></div><div>收益 <span style="color:var(--text-primary);font-weight:500;">-</span></div></div>
+                            <div style="display: flex; gap: 6px; margin-top: 10px;">
+                                <span style="padding: 2px 8px; border-radius: 4px; font-size: 11px; background: rgba(58,193,179,0.1); color: var(--accent); border: 1px solid var(--border-active);">开发工具</span>
+                                <span style="padding: 2px 8px; border-radius: 4px; font-size: 11px; background: rgba(58,193,179,0.1); color: var(--accent); border: 1px solid var(--border-active);">API</span>
+                            </div>
+                        </div>
+                        <div class="skill-card">
+                            <div class="skill-card-header"><div class="skill-card-name">爬虫模板工具</div><span style="font-size:11px;padding:2px 8px;border-radius:4px;background:rgba(43,187,138,0.15);color:var(--success);">已上线</span></div>
+                            <div style="font-size: 12px; color: var(--accent); font-family: 'JetBrains Mono', monospace; margin-bottom: 8px;">AI 评分 8.2</div>
+                            <div class="skill-card-meta"><div>调用 <span style="color:var(--text-primary);font-weight:500;">5,432</span></div><div>收益 <span style="color:var(--text-primary);font-weight:500;">¥890</span></div></div>
+                            <div style="display: flex; gap: 6px; margin-top: 10px;">
+                                <span style="padding: 2px 8px; border-radius: 4px; font-size: 11px; background: rgba(58,193,179,0.1); color: var(--accent); border: 1px solid var(--border-active);">爬虫</span>
+                                <span style="padding: 2px 8px; border-radius: 4px; font-size: 11px; background: rgba(58,193,179,0.1); color: var(--accent); border: 1px solid var(--border-active);">自动化</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="margin-bottom: 0;">
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Skill 状态</div>
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(43,187,138,0.15); display: flex; align-items: center; justify-content: center; font-size: 16px;">🟢</div>
+                            <div>
+                                <div style="font-size: 14px; font-weight: 500;">已上线</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">3 个 Skill</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(207,153,55,0.15); display: flex; align-items: center; justify-content: center; font-size: 16px;">🟡</div>
+                            <div>
+                                <div style="font-size: 14px; font-weight: 500;">审核中</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">1 个 Skill</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(90,106,106,0.15); display: flex; align-items: center; justify-content: center; font-size: 16px;">⚫</div>
+                            <div>
+                                <div style="font-size: 14px; font-weight: 500;">草稿</div>
+                                <div style="font-size: 12px; color: var(--text-muted);">0 个 Skill</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+                        <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">今日调用分布</div>
+                        <div style="display: flex; gap: 4px; height: 60px; align-items: flex-end;">
+                            <div style="flex: 1; background: rgba(58,193,179,0.3); border-radius: 2px; height: 40%;"></div>
+                            <div style="flex: 1; background: rgba(58,193,179,0.3); border-radius: 2px; height: 65%;"></div>
+                            <div style="flex: 1; background: rgba(58,193,179,0.3); border-radius: 2px; height: 50%;"></div>
+                            <div style="flex: 1; background: rgba(58,193,179,0.3); border-radius: 2px; height: 80%;"></div>
+                            <div style="flex: 1; background: rgba(58,193,179,0.5); border-radius: 2px; height: 100%;"></div>
+                            <div style="flex: 1; background: rgba(58,193,179,0.3); border-radius: 2px; height: 70%;"></div>
+                            <div style="flex: 1; background: rgba(58,193,179,0.3); border-radius: 2px; height: 55%;"></div>
+                            <div style="flex: 1; background: rgba(58,193,179,0.3); border-radius: 2px; height: 45%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 创作者视角：用户评价（假数据背景） ===== -->
+        <div class="page-section" data-page="feedback" data-identity="creator">
+            <div class="page-header">
+                <h1 class="page-title">用户评价</h1>
+                <p class="page-subtitle">查看用户对 Skill 的反馈</p>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="card" style="margin-bottom: 0;">
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">评分分布</div>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 20px; padding: 20px 0;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 48px; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono', monospace;">8.9</div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">平均评分</div>
+                        </div>
+                        <div style="flex: 1; max-width: 200px; display: flex; flex-direction: column; gap: 6px;">
+                            <div style="display: flex; align-items: center; gap: 8px;"><span style="font-size: 11px; color: var(--text-muted); width: 20px;">10</span><div style="flex: 1; height: 6px; background: var(--bg-surface); border-radius: 3px; overflow: hidden;"><div style="width: 65%; height: 100%; background: var(--accent); border-radius: 3px;"></div></div></div>
+                            <div style="display: flex; align-items: center; gap: 8px;"><span style="font-size: 11px; color: var(--text-muted); width: 20px;">8</span><div style="flex: 1; height: 6px; background: var(--bg-surface); border-radius: 3px; overflow: hidden;"><div style="width: 80%; height: 100%; background: var(--accent); border-radius: 3px;"></div></div></div>
+                            <div style="display: flex; align-items: center; gap: 8px;"><span style="font-size: 11px; color: var(--text-muted); width: 20px;">6</span><div style="flex: 1; height: 6px; background: var(--bg-surface); border-radius: 3px; overflow: hidden;"><div style="width: 30%; height: 100%; background: var(--accent); border-radius: 3px;"></div></div></div>
+                            <div style="display: flex; align-items: center; gap: 8px;"><span style="font-size: 11px; color: var(--text-muted); width: 20px;">4</span><div style="flex: 1; height: 6px; background: var(--bg-surface); border-radius: 3px; overflow: hidden;"><div style="width: 10%; height: 100%; background: var(--accent); border-radius: 3px;"></div></div></div>
+                            <div style="display: flex; align-items: center; gap: 8px;"><span style="font-size: 11px; color: var(--text-muted); width: 20px;">2</span><div style="flex: 1; height: 6px; background: var(--bg-surface); border-radius: 3px; overflow: hidden;"><div style="width: 5%; height: 100%; background: var(--accent); border-radius: 3px;"></div></div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="margin-bottom: 0;">
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">评价概览</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                        <div style="text-align: center; padding: 16px; background: var(--bg-surface); border-radius: 10px;">
+                            <div style="font-size: 24px; font-weight: 700; color: var(--accent);">128</div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">总评价数</div>
+                        </div>
+                        <div style="text-align: center; padding: 16px; background: var(--bg-surface); border-radius: 10px;">
+                            <div style="font-size: 24px; font-weight: 700; color: var(--success);">92%</div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">好评率</div>
+                        </div>
+                        <div style="text-align: center; padding: 16px; background: var(--bg-surface); border-radius: 10px;">
+                            <div style="font-size: 24px; font-weight: 700; color: var(--accent);">24</div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">本月新增</div>
+                        </div>
+                        <div style="text-align: center; padding: 16px; background: var(--bg-surface); border-radius: 10px;">
+                            <div style="font-size: 24px; font-weight: 700; color: var(--warning);">8</div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">待回复</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">最新评价</div>
+                <div class="feedback-item">
+                    <div class="feedback-avatar">A</div>
+                    <div class="feedback-content">
+                        <div class="feedback-user">Alex · 智能翻译助手</div>
+                        <div class="feedback-text">太好用了！批量翻译功能帮我省了很多时间，准确率也很高。</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px; font-family: 'JetBrains Mono', monospace;">2025-05-17 · ⭐ 9.4</div>
+                    </div>
+                </div>
+                <div class="feedback-item">
+                    <div class="feedback-avatar">B</div>
+                    <div class="feedback-content">
+                        <div class="feedback-user">Bob · 数据分析大师</div>
+                        <div class="feedback-text">可视化功能很强大，但是希望能支持更多图表类型。</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px; font-family: 'JetBrains Mono', monospace;">2025-05-16 · ⭐ 8.8</div>
+                    </div>
+                </div>
+                <div class="feedback-item">
+                    <div class="feedback-avatar">C</div>
+                    <div class="feedback-content">
+                        <div class="feedback-user">Carol · 爬虫模板工具</div>
+                        <div class="feedback-text">配置简单，抓取速度快，稳定性也很好，已经用在项目里了。</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px; font-family: 'JetBrains Mono', monospace;">2025-05-15 · ⭐ 9.2</div>
+                    </div>
+                </div>
+                <div class="feedback-item">
+                    <div class="feedback-avatar">D</div>
+                    <div class="feedback-content">
+                        <div class="feedback-user">David · 智能翻译助手</div>
+                        <div class="feedback-text">小语种翻译效果出乎意料的好，比很多付费工具还准确。</div>
+                        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px; font-family: 'JetBrains Mono', monospace;">2025-05-14 · ⭐ 9.6</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 创作者视角：收益管理（假数据背景） ===== -->
+        <div class="page-section" data-page="earnings" data-identity="creator">
+            <div class="page-header">
+                <h1 class="page-title">收益管理</h1>
+                <p class="page-subtitle">查看余额与提现</p>
+            </div>
+            <div class="balance-card">
+                <div>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">可提现余额</div>
+                    <div style="font-size: 42px; font-weight: 700; color: var(--accent); font-family: 'JetBrains Mono', monospace; margin-bottom: 8px;">¥3,240.00</div>
+                    <div style="font-size: 13px; color: var(--text-muted);">累计收益 ¥6,490 · 本月已结算 ¥4,860</div>
+                </div>
+                <button class="btn-primary" style="padding: 12px 28px; background: var(--accent); color: var(--bg-base); border: none; border-radius: 8px; font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer;">申请提现</button>
+            </div>
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px;">
+                <div class="card" style="margin-bottom: 0;">
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">收益趋势</div>
+                    <div style="display: flex; align-items: flex-end; gap: 6px; height: 160px; padding: 10px 0;">
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.35), rgba(58,193,179,0.08)); border-radius: 4px 4px 0 0; height: 30%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.35), rgba(58,193,179,0.08)); border-radius: 4px 4px 0 0; height: 45%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.35), rgba(58,193,179,0.08)); border-radius: 4px 4px 0 0; height: 40%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.35), rgba(58,193,179,0.08)); border-radius: 4px 4px 0 0; height: 55%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.35), rgba(58,193,179,0.08)); border-radius: 4px 4px 0 0; height: 50%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.4), rgba(58,193,179,0.1)); border-radius: 4px 4px 0 0; height: 70%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.4), rgba(58,193,179,0.1)); border-radius: 4px 4px 0 0; height: 65%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.45), rgba(58,193,179,0.12)); border-radius: 4px 4px 0 0; height: 85%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.45), rgba(58,193,179,0.12)); border-radius: 4px 4px 0 0; height: 78%;"></div>
+                        <div style="flex: 1; background: linear-gradient(to top, rgba(58,193,179,0.5), rgba(58,193,179,0.15)); border-radius: 4px 4px 0 0; height: 95%;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-top: 8px; font-family: 'JetBrains Mono', monospace;">
+                        <span>1月</span><span>2月</span><span>3月</span><span>4月</span><span>5月</span><span>6月</span><span>7月</span><span>8月</span><span>9月</span><span>10月</span>
+                    </div>
+                </div>
+                <div class="card" style="margin-bottom: 0;">
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">收益构成</div>
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                                <span>智能翻译助手</span><span style="color: var(--accent); font-family: 'JetBrains Mono', monospace;">52%</span>
+                            </div>
+                            <div style="height: 6px; background: var(--bg-surface); border-radius: 3px; overflow: hidden;">
+                                <div style="width: 52%; height: 100%; background: var(--accent); border-radius: 3px;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                                <span>数据分析大师</span><span style="color: var(--accent); font-family: 'JetBrains Mono', monospace;">34%</span>
+                            </div>
+                            <div style="height: 6px; background: var(--bg-surface); border-radius: 3px; overflow: hidden;">
+                                <div style="width: 34%; height: 100%; background: var(--accent); border-radius: 3px;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                                <span>爬虫模板工具</span><span style="color: var(--accent); font-family: 'JetBrains Mono', monospace;">14%</span>
+                            </div>
+                            <div style="height: 6px; background: var(--bg-surface); border-radius: 3px; overflow: hidden;">
+                                <div style="width: 14%; height: 100%; background: var(--accent); border-radius: 3px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">结算记录</div>
+                <div style="width: 100%;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; padding: 12px 16px; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); border-bottom: 1px solid var(--border-subtle);">
+                        <div>时间</div><div>金额</div><div>类型</div><div>状态</div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border-subtle); font-size: 14px;">
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary);">2025-05-15</div>
+                        <div style="font-weight: 600; color: var(--accent);">¥340.00</div>
+                        <div style="color: var(--text-secondary);">周结算</div>
+                        <div style="color: var(--success); font-size: 12px;">已到账</div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border-subtle); font-size: 14px;">
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary);">2025-05-08</div>
+                        <div style="font-weight: 600; color: var(--accent);">¥520.00</div>
+                        <div style="color: var(--text-secondary);">周结算</div>
+                        <div style="color: var(--success); font-size: 12px;">已到账</div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--border-subtle); font-size: 14px;">
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary);">2025-05-01</div>
+                        <div style="font-weight: 600; color: var(--accent);">¥480.00</div>
+                        <div style="color: var(--text-secondary);">周结算</div>
+                        <div style="color: var(--success); font-size: 12px;">已到账</div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; padding: 14px 16px; font-size: 14px;">
+                        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-secondary);">2025-04-24</div>
+                        <div style="font-weight: 600; color: var(--accent);">¥390.00</div>
+                        <div style="color: var(--text-secondary);">周结算</div>
+                        <div style="color: var(--success); font-size: 12px;">已到账</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== Onboarding Overlay ===== -->
+    <div class="onboarding-overlay" id="onboardingOverlay">
+        <div class="onboarding-backdrop"></div>
+        <div class="onboarding-modal">
+            <!-- Header -->
+            <div class="onboarding-header">
+                <div class="onboarding-icon">✨</div>
+                <div class="onboarding-title">开启创作者之旅</div>
+                <div class="onboarding-subtitle">创建你的第一个 Skill，将能力封装成服务<br>触达万千用户，开启收益通道</div>
+            </div>
+
+            <!-- Preview -->
+            <div class="onboarding-preview">
+                <div class="onboarding-preview-main">
+                    <div class="onboarding-preview-label">创作者平均月收益</div>
+                    <div class="onboarding-preview-value">¥5,200+</div>
+                    <div class="onboarding-preview-sub">头部创作者月均 ¥12,800 · 收益分成高达 85%</div>
+                </div>
+                <div class="onboarding-preview-chart">
+                    <div class="preview-bar" style="height: 25%"></div>
+                    <div class="preview-bar" style="height: 40%"></div>
+                    <div class="preview-bar" style="height: 35%"></div>
+                    <div class="preview-bar" style="height: 55%"></div>
+                    <div class="preview-bar" style="height: 70%"></div>
+                    <div class="preview-bar active" style="height: 100%"></div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="onboarding-features-title">创作者特权</div>
+            <div class="onboarding-features">
+                <div class="onboarding-feature">
+                    <div class="onboarding-feature-icon">🔄</div>
+                    <div>
+                        <div class="onboarding-feature-name">能力复用</div>
+                        <div class="onboarding-feature-desc">一次封装，永久调用 · 告别重复劳动</div>
+                    </div>
+                </div>
+                <div class="onboarding-feature">
+                    <div class="onboarding-feature-icon">⚡</div>
+                    <div>
+                        <div class="onboarding-feature-name">秒级响应</div>
+                        <div class="onboarding-feature-desc">7×24 自动处理 · 任务零等待</div>
+                    </div>
+                </div>
+                <div class="onboarding-feature">
+                    <div class="onboarding-feature-icon">📦</div>
+                    <div>
+                        <div class="onboarding-feature-name">批量稳定交付</div>
+                        <div class="onboarding-feature-desc">同时服务多用户 · 效率指数级提升</div>
+                    </div>
+                </div>
+                <div class="onboarding-feature">
+                    <div class="onboarding-feature-icon">🤖</div>
+                    <div>
+                        <div class="onboarding-feature-name">智能增强</div>
+                        <div class="onboarding-feature-desc">AI 辅助优化 · 持续自我进化</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA -->
+            <div class="onboarding-cta">
+                <button class="onboarding-btn" onclick="alert('跳转到 Skill 创建页面')">创建第一个 Skill</button>
+                <div class="onboarding-hint">免费创建 · 审核通过即可上线</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Close button -->
+    <button class="onboarding-close" id="closeOnboarding">×</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const identityPills = document.querySelectorAll('.identity-pill');
+            const userTabs = document.getElementById('userTabs');
+            const creatorTabs = document.getElementById('creatorTabs');
+            const allTabs = document.querySelectorAll('.nav-tab');
+            const pageSections = document.querySelectorAll('.page-section');
+            const onboardingOverlay = document.getElementById('onboardingOverlay');
+            const closeOnboarding = document.getElementById('closeOnboarding');
+            let hasShownOnboarding = false;
+
+            function showOnboarding() {
+                onboardingOverlay.classList.add('active');
+                closeOnboarding.style.display = 'flex';
+                hasShownOnboarding = true;
+            }
+
+            function hideOnboarding() {
+                onboardingOverlay.classList.remove('active');
+                closeOnboarding.style.display = 'none';
+            }
+
+            function switchIdentity(identity) {
+                identityPills.forEach(p => p.classList.toggle('active', p.dataset.identity === identity));
+                userTabs.style.display = identity === 'user' ? 'flex' : 'none';
+                creatorTabs.style.display = identity === 'creator' ? 'flex' : 'none';
+
+                allTabs.forEach(t => t.classList.remove('active'));
+                const activeNav = identity === 'user' ? userTabs : creatorTabs;
+                const firstTab = activeNav.querySelector('.nav-tab');
+                if (firstTab) firstTab.classList.add('active');
+
+                pageSections.forEach(section => {
+                    const sectionIdentity = section.dataset.identity;
+                    const page = section.dataset.page;
+                    const isFirstPage = page === (identity === 'user' ? 'profile' : 'overview');
+                    section.classList.toggle('active', sectionIdentity === identity && isFirstPage);
+                });
+
+                // 从未创建过 Skill 的用户点击创作者时弹出蒙版
+                if (identity === 'creator') {
+                    showOnboarding();
+                } else {
+                    hideOnboarding();
+                }
+            }
+
+            identityPills.forEach(pill => {
+                pill.addEventListener('click', () => switchIdentity(pill.dataset.identity));
+            });
+
+            allTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const page = this.dataset.page;
+                    const parentNav = this.closest('.horizontal-nav');
+                    parentNav.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    pageSections.forEach(section => {
+                        section.classList.toggle('active', section.dataset.page === page);
+                    });
+
+                    // 创作者下任何二级菜单都弹出同一个蒙版
+                    if (parentNav.id === 'creatorTabs') {
+                        showOnboarding();
+                    }
+                });
+            });
+
+            closeOnboarding.addEventListener('click', hideOnboarding);
+
+            // 点击 backdrop 也可关闭
+            onboardingOverlay.addEventListener('click', function(e) {
+                if (e.target === onboardingOverlay || e.target.classList.contains('onboarding-backdrop')) {
+                    hideOnboarding();
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
