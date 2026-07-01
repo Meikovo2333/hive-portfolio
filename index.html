@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>作品集 | AI 产品经理</title>
+    <title>刘儒辰 | AI 产品经理作品集</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -24,175 +24,384 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        html { scroll-behavior: smooth; }
+
         body {
             font-family: 'Space Grotesk', sans-serif;
             background: var(--bg-base);
             color: var(--text-primary);
-            min-height: 100vh;
             line-height: 1.7;
         }
 
-        /* Header */
-        header {
-            padding: 80px 40px 40px;
-            max-width: 1200px;
-            margin: 0 auto;
-            text-align: center;
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(18, 30, 30, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+            z-index: 1000;
+            padding: 0 40px;
         }
 
-        .badge {
-            display: inline-block;
-            padding: 6px 18px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 500;
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            font-size: 18px;
+            font-weight: 700;
             color: var(--accent);
-            border: 1px solid var(--border-active);
-            margin-bottom: 24px;
             letter-spacing: 1px;
         }
 
-        h1 {
-            font-size: 48px;
+        .nav-links {
+            display: flex;
+            gap: 32px;
+        }
+
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover { color: var(--accent); }
+
+        /* Hero */
+        .hero {
+            padding: 140px 40px 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--accent);
+            border: 1px solid var(--border-active);
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: 56px;
             font-weight: 700;
             margin-bottom: 16px;
             letter-spacing: -1px;
         }
 
-        .accent { color: var(--accent); }
+        .hero h1 .accent { color: var(--accent); }
 
-        .subtitle {
-            font-size: 18px;
+        .hero-subtitle {
+            font-size: 20px;
             color: var(--text-secondary);
-            max-width: 600px;
-            margin: 0 auto 40px;
-        }
-
-        .highlights {
-            display: flex;
-            gap: 32px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
-
-        .highlight {
-            text-align: center;
-        }
-
-        .highlight .num {
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--accent);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .highlight .label {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        /* Section */
-        section {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 40px;
-        }
-
-        .section-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            max-width: 650px;
             margin-bottom: 32px;
         }
 
-        /* Project Grid */
-        .projects {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(520px, 1fr));
+        .hero-contact {
+            display: flex;
             gap: 24px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
         }
 
-        .project-card {
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .contact-item svg {
+            width: 18px; height: 18px;
+            fill: var(--accent);
+        }
+
+        .hero-cta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg-base);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-dim);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--border-active);
+        }
+
+        /* Sections */
+        section {
+            padding: 80px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            margin-bottom: 48px;
+        }
+
+        .section-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .section-desc {
+            color: var(--text-secondary);
+            font-size: 16px;
+            max-width: 700px;
+        }
+
+        /* Cards */
+        .card {
             background: var(--bg-card);
             border: 1px solid var(--border-subtle);
             border-radius: 16px;
             padding: 32px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-            display: block;
+            margin-bottom: 24px;
         }
 
-        .project-card:hover {
+        .card h3 {
+            font-size: 20px;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        .card p, .card li {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        .card ul {
+            padding-left: 20px;
+        }
+
+        .card li {
+            margin-bottom: 8px;
+        }
+
+        /* Contributions grid */
+        .contrib-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .contrib-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.2s;
+        }
+
+        .contrib-card:hover {
             border-color: var(--border-active);
-            box-shadow: 0 0 30px var(--accent-glow);
             transform: translateY(-2px);
         }
 
-        .project-header {
+        .contrib-num {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 8px;
+        }
+
+        .contrib-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .contrib-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Full width image */
+        .figure {
+            margin: 32px 0;
+        }
+
+        .figure img {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            cursor: zoom-in;
+            transition: transform 0.2s;
+        }
+
+        .figure img:hover {
+            transform: scale(1.005);
+        }
+
+        .figure-caption {
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        /* Gallery */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-surface);
+            aspect-ratio: 16 / 10;
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: zoom-in;
+            transition: transform 0.3s;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .gallery-caption {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            padding: 12px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            font-size: 13px;
+            color: var(--text-primary);
+        }
+
+        /* Prototype cards */
+        .proto-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .proto-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 28px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s;
+            display: block;
+        }
+
+        .proto-card:hover {
+            border-color: var(--border-active);
+            box-shadow: 0 0 30px var(--accent-glow);
+            transform: translateY(-3px);
+        }
+
+        .proto-icon {
+            width: 48px; height: 48px;
+            border-radius: 12px;
+            background: var(--accent-glow);
             display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
             margin-bottom: 16px;
         }
 
-        .project-title {
-            font-size: 22px;
+        .proto-title {
+            font-size: 18px;
             font-weight: 600;
-            margin-bottom: 4px;
+            margin-bottom: 8px;
         }
 
-        .project-tag {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-            background: var(--accent-glow);
-            color: var(--accent);
-            white-space: nowrap;
-        }
-
-        .project-desc {
+        .proto-desc {
+            font-size: 14px;
             color: var(--text-secondary);
-            font-size: 15px;
-            margin-bottom: 20px;
-            line-height: 1.7;
+            margin-bottom: 16px;
         }
 
-        .project-meta {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            color: var(--text-muted);
-        }
-
-        .meta-item svg {
-            width: 16px;
-            height: 16px;
-            fill: currentColor;
-        }
-
-        .arrow {
-            margin-left: auto;
+        .proto-link {
+            font-size: 14px;
             color: var(--accent);
-            font-size: 20px;
-            transition: transform 0.2s ease;
+            font-weight: 500;
         }
 
-        .project-card:hover .arrow {
-            transform: translateX(4px);
+        /* Videos */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 24px;
+        }
+
+        .video-item {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .video-item video {
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            background: #000;
+        }
+
+        .video-caption {
+            padding: 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
         }
 
         /* Skills */
@@ -212,175 +421,379 @@
             border: 1px solid var(--border-subtle);
         }
 
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .lightbox.active { display: flex; }
+
+        .lightbox img {
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 8px;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 24px; right: 32px;
+            font-size: 36px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
         /* Footer */
         footer {
             text-align: center;
             padding: 60px 40px;
             color: var(--text-muted);
             font-size: 14px;
-        }
-
-        footer a {
-            color: var(--accent);
-            text-decoration: none;
+            border-top: 1px solid var(--border-subtle);
         }
 
         /* Responsive */
         @media (max-width: 768px) {
-            h1 { font-size: 32px; }
-            .projects { grid-template-columns: 1fr; }
-            .highlights { gap: 20px; }
+            .nav-links { display: none; }
+            .hero h1 { font-size: 36px; }
+            .hero { padding-top: 100px; }
+            section { padding: 60px 24px; }
+            .video-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="badge">AI 产品经理 · 从 0 到 1 产品规划</div>
-        <h1>Hive 平台 <span class="accent">产品设计</span> 作品集</h1>
-        <p class="subtitle">
-            负责 AI 多智能体协作平台 Hive 的全链路产品设计，覆盖业务流程、创作者中心、工作页面、个人中心、数据埋点等核心模块。
+    <nav>
+        <div class="nav-inner">
+            <div class="nav-logo">PORTFOLIO</div>
+            <div class="nav-links">
+                <a href="#project">项目</a>
+                <a href="#process">流程</a>
+                <a href="#prototypes">原型</a>
+                <a href="#videos">视频</a>
+                <a href="#skills">技能</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-badge">AI 产品经理 · 从 0 到 1 产品规划</div>
+        <h1>刘儒辰 <span class="accent">AI 产品经理</span></h1>
+        <p class="hero-subtitle">
+            英国提赛德大学人工智能硕士，专业绩点第一。一年 AI 多智能体协作平台从 0 到 1 产品实战经验，具备从需求分析、流程设计、UI/UX 设计到可运行原型的全链路能力。
         </p>
-        <div class="highlights">
-            <div class="highlight">
-                <div class="num">9</div>
-                <div class="label">核心页面</div>
-            </div>
-            <div class="highlight">
-                <div class="num">6</div>
-                <div class="label">功能模块</div>
-            </div>
-            <div class="highlight">
-                <div class="num">5+</div>
-                <div class="label">动态原型</div>
-            </div>
-            <div class="highlight">
-                <div class="num">20+</div>
-                <div class="label">数据埋点</div>
-            </div>
+        <div class="hero-contact">
+            <span class="contact-item">
+                <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                上海
+            </span>
+            <span class="contact-item">
+                <svg viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg>
+                英国提赛德大学 · 人工智能硕士
+            </span>
+        </div>
+        <div class="hero-cta">
+            <a href="#prototypes" class="btn btn-primary">查看可交互原型</a>
+            <a href="../简历-业绩版.md" class="btn btn-secondary" download>下载简历</a>
         </div>
     </header>
 
-    <section>
-        <div class="section-title">项目原型</div>
-        <div class="projects">
+    <section id="project">
+        <div class="section-header">
+            <div class="section-label">Project</div>
+            <h2 class="section-title">Hive / ONES — AI 多智能体协作平台</h2>
+            <p class="section-desc">
+                负责 Hive 平台从 0 到 1 的产品规划、需求定义、流程设计与全生命周期管理。主导覆盖用户登录、需求输入、Agent 团队组建、项目执行监控、交付下载的完整 5 阶段业务闭环设计。
+            </p>
+        </div>
 
-            <a class="project-card" href="./hive-workspace.html">
-                <div class="project-header">
-                    <div>
-                        <div class="project-title">工作页面 Workspace</div>
-                    </div>
-                    <span class="project-tag">核心场景</span>
-                </div>
-                <p class="project-desc">
-                    项目执行监控核心页面。包含 Manager 办公桌（全局总览）、办公楼平面图（Agent 团队空间隐喻可视化）、Task Graph（任务依赖网络）、时间线（工期规划）、格子间内部抽屉（Agent 详情下钻）、团队邮箱中心（沟通记录）。支持精灵球轻咨询。
-                </p>
-                <div class="project-meta">
-                    <span class="meta-item">
-                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                        6 大核心模块
-                    </span>
-                    <span class="meta-item">
-                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                        空间隐喻设计
-                    </span>
-                    <span class="arrow">→</span>
-                </div>
-            </a>
+        <div class="card">
+            <h3>我的核心贡献</h3>
+            <ul>
+                <li>独立完成端到端业务流程图与功能流程图，覆盖 7 个业务环节、4 个系统角色、6 类异常分支与 4 态工作流</li>
+                <li>主导创作者中心 9 个核心页面、工作页面 6 大核心模块、个人中心双角色体系的产品设计与 PRD 输出</li>
+                <li>输出完整 Design Tokens 设计规范，含独立制定的色彩方案、深色模式主题、间距规范与组件样式</li>
+                <li>设计全链路数据埋点体系，构建 7 层用户行为漏斗，定义 20+ 核心事件与 6 项转化指标</li>
+                <li>协调设计、前端、后端、测试 4 个职能团队，按期交付 15+ 功能模块</li>
+                <li>熟练使用 Claude Code、Kimi、Figma 等 AI 工具矩阵，累计输出 5+ 套可交互 HTML 原型</li>
+                <li>在职期间兼任 HR 工作，负责研发团队人才招聘与面试筛选</li>
+            </ul>
+        </div>
 
-            <a class="project-card" href="./hive-creator-onboarding.html">
-                <div class="project-header">
-                    <div>
-                        <div class="project-title">创作者中心 Creator Center</div>
-                    </div>
-                    <span class="project-tag">从 0 到 1</span>
-                </div>
-                <p class="project-desc">
-                    面向内容创作者的完整后台系统。包含概览 Dashboard、我的技能、技能详情、财务中心、数据中心、账号设置、偏好设置、帮助中心、升级页面。设计三级账号等级体系（FREE/PRO/MAX），完成创作者商业化路径设计。
-                </p>
-                <div class="project-meta">
-                    <span class="meta-item">
-                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                        9 个核心页面
-                    </span>
-                    <span class="meta-item">
-                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                        商业化设计
-                    </span>
-                    <span class="arrow">→</span>
-                </div>
-            </a>
-
-            <a class="project-card" href="./hive-profile-design.html">
-                <div class="project-header">
-                    <div>
-                        <div class="project-title">个人中心 Profile</div>
-                    </div>
-                    <span class="project-tag">双角色架构</span>
-                </div>
-                <p class="project-desc">
-                    用户个人中心与创作者个人中心双角色体系。支持角色切换与权限隔离，覆盖个人信息、账户与账单、设置、帮助中心、数据概览、我的 Skill、收益管理、创作者设置等 9 个功能模块。输出完整 Design Tokens 设计规范。
-                </p>
-                <div class="project-meta">
-                    <span class="meta-item">
-                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                        双角色体系
-                    </span>
-                    <span class="meta-item">
-                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                        Design Tokens
-                    </span>
-                    <span class="arrow">→</span>
-                </div>
-            </a>
-
-            <a class="project-card" href="./sanguo.html">
-                <div class="project-header">
-                    <div>
-                        <div class="project-title">魏蜀三国圣地巡礼攻略生成器</div>
-                    </div>
-                    <span class="project-tag">独立项目</span>
-                </div>
-                <p class="project-desc">
-                    使用 AI 工具独立完成的旅游攻略生成工具。支持选择三国阵营（魏/蜀）、出行日期、游玩天数，自动生成包含行程规划、景点推荐、预算估算的完整攻略文档，支持打印导出。
-                </p>
-                <div class="project-meta">
-                    <span class="meta-item">
-                        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                        AI 生成内容
-                    </span>
-                    <span class="meta-item">
-                        <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                        打印导出
-                    </span>
-                    <span class="arrow">→</span>
-                </div>
-            </a>
-
+        <div class="contrib-grid">
+            <div class="contrib-card">
+                <div class="contrib-num">9</div>
+                <div class="contrib-title">核心页面</div>
+                <div class="contrib-desc">创作者中心 9 页从 0 到 1 落地</div>
+            </div>
+            <div class="contrib-card">
+                <div class="contrib-num">6</div>
+                <div class="contrib-title">功能模块</div>
+                <div class="contrib-desc">工作页面核心模块设计</div>
+            </div>
+            <div class="contrib-card">
+                <div class="contrib-num">20+</div>
+                <div class="contrib-title">埋点事件</div>
+                <div class="contrib-desc">全链路数据埋点定义</div>
+            </div>
+            <div class="contrib-card">
+                <div class="contrib-num">15+</div>
+                <div class="contrib-title">交付模块</div>
+                <div class="contrib-desc">按期高质量上线</div>
+            </div>
         </div>
     </section>
 
-    <section>
-        <div class="section-title">工具能力</div>
-        <div class="skills-grid">
-            <span class="skill-tag">Claude Code</span>
-            <span class="skill-tag">Kimi</span>
-            <span class="skill-tag">Marvis</span>
-            <span class="skill-tag">Qoder</span>
-            <span class="skill-tag">MiniMax</span>
-            <span class="skill-tag">Figma</span>
-            <span class="skill-tag">HTML/CSS 原型</span>
-            <span class="skill-tag">PRD 撰写</span>
-            <span class="skill-tag">数据埋点</span>
-            <span class="skill-tag">竞品分析</span>
-            <span class="skill-tag">业务流程设计</span>
-            <span class="skill-tag">UI/UX 设计</span>
+    <section id="process" style="background: var(--bg-card); margin: 0; max-width: none; padding-left: 40px; padding-right: 40px;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <div class="section-header">
+                <div class="section-label">Process</div>
+                <h2 class="section-title">业务流程与功能架构</h2>
+                <p class="section-desc">从需求洞察到产品交付的完整设计过程，包含业务流程图、功能架构思维导图、功能列表、验收标准与项目排期。</p>
+            </div>
+
+            <div class="card">
+                <h3>端到端业务流程图</h3>
+                <p>覆盖用户、产品界面、业务校验、支付系统 4 个系统角色，以及需求沟通、需求确认/卡点、团队组建、工作执行、交付下载 5 大阶段。</p>
+                <div class="figure">
+                    <img src="assets/diagrams/业务流程图.png" alt="业务流程图" class="zoomable">
+                    <div class="figure-caption">Hive 多智能体协作平台 - 业务流程图</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>工作页面功能架构</h3>
+                <p>以"空间隐喻"为核心理念，将 Manager 办公桌、办公楼平面图、Task Graph、时间线、格子间抽屉、团队邮箱、精灵球等模块进行结构化拆解。</p>
+                <div class="figure">
+                    <img src="assets/diagrams/工作页面详情.jpeg" alt="工作页面功能架构" class="zoomable">
+                    <div class="figure-caption">工作页面功能架构思维导图</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>功能列表、验收标准与埋点设计</h3>
+                <p>使用在线文档维护功能清单、优先级（P0/P1/P2）、验收标准与埋点事件，确保需求从定义到上线有完整闭环。</p>
+                <div class="gallery">
+                    <div class="gallery-item">
+                        <img src="assets/documents/功能列表示例.png" alt="功能列表" class="zoomable">
+                        <div class="gallery-caption">功能列表示例</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/documents/验收表.png" alt="验收表" class="zoomable">
+                        <div class="gallery-caption">验收表</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/documents/埋点示例.png" alt="埋点示例" class="zoomable">
+                        <div class="gallery-caption">埋点示例</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>项目进度甘特图</h3>
+                <p>独立制定产品开发排期计划，拆解需求优先级与依赖关系，跟踪关键里程碑。</p>
+                <div class="gallery">
+                    <div class="gallery-item">
+                        <img src="assets/diagrams/gantt-1.png" alt="甘特图1" class="zoomable">
+                        <div class="gallery-caption">项目排期甘特图 1</div>
+                    </div>
+                    <div class="gallery-item">
+                        <img src="assets/diagrams/gantt-2.png" alt="甘特图2" class="zoomable">
+                        <div class="gallery-caption">项目排期甘特图 2</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="screenshots">
+        <div class="section-header">
+            <div class="section-label">UI Design</div>
+            <h2 class="section-title">原型截图</h2>
+            <p class="section-desc">使用 Figma 完成高保真设计稿，覆盖深色/浅色双模式、创作者中心、工作页面、个人中心、支付组件、需求确认等核心场景。</p>
+        </div>
+
+        <div class="gallery">
+            <div class="gallery-item"><img src="assets/screenshots/深色模式_工作页面v2.png" alt="工作页面" class="zoomable"><div class="gallery-caption">深色模式 - 工作页面</div></div>
+            <div class="gallery-item"><img src="assets/screenshots/深色模式_项目监控.png" alt="项目监控" class="zoomable"><div class="gallery-caption">深色模式 - 项目监控</div></div>
+            <div class="gallery-item"><img src="assets/screenshots/深色模式_个人中心.png" alt="个人中心" class="zoomable"><div class="gallery-caption">深色模式 - 个人中心</div></div>
+            <div class="gallery-item"><img src="assets/screenshots/深色模式_支付组件.png" alt="支付组件" class="zoomable"><div class="gallery-caption">深色模式 - 支付组件</div></div>
+            <div class="gallery-item"><img src="assets/screenshots/深色模式_需求确认页面.png" alt="需求确认" class="zoomable"><div class="gallery-caption">深色模式 - 需求确认</div></div>
+            <div class="gallery-item"><img src="assets/screenshots/深色模式_圆桌会议详版.png" alt="圆桌会议" class="zoomable"><div class="gallery-caption">深色模式 - 圆桌会议</div></div>
+            <div class="gallery-item"><img src="assets/screenshots/深色模式_定制agent.png" alt="定制 Agent" class="zoomable"><div class="gallery-caption">深色模式 - 定制 Agent</div></div>
+            <div class="gallery-item"><img src="assets/screenshots/浅色模式_团队组建页面.png" alt="团队组建" class="zoomable"><div class="gallery-caption">浅色模式 - 团队组建</div></div>
+            <div class="gallery-item"><img src="assets/screenshots/浅色模式_工作页面.png" alt="浅色工作页面" class="zoomable"><div class="gallery-caption">浅色模式 - 工作页面</div></div>
+            <div class="gallery-item"><img src="assets/screenshots/浅色模式_需求确认.png" alt="浅色需求确认" class="zoomable"><div class="gallery-caption">浅色模式 - 需求确认</div></div>
+            <div class="gallery-item"><img src="assets/screenshots/浅色模式_支付组件.png" alt="浅色支付组件" class="zoomable"><div class="gallery-caption">浅色模式 - 支付组件</div></div>
+            <div class="gallery-item"><img src="assets/screenshots/浅色模式_社区.png" alt="浅色社区" class="zoomable"><div class="gallery-caption">浅色模式 - 社区</div></div>
+        </div>
+    </section>
+
+    <section id="prototypes" style="background: var(--bg-card); margin: 0; max-width: none; padding-left: 40px; padding-right: 40px;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <div class="section-header">
+                <div class="section-label">Interactive Prototype</div>
+                <h2 class="section-title">可交互原型</h2>
+                <p class="section-desc">使用 Claude Code 将 Figma 设计稿转化为可交互 HTML/CSS 原型，支持页面跳转、状态切换与交互动效。点击卡片即可打开对应原型。</p>
+            </div>
+
+            <div class="proto-grid">
+                <a href="hive-workspace.html" class="proto-card" target="_blank">
+                    <div class="proto-icon">🖥️</div>
+                    <div class="proto-title">工作页面 Workspace</div>
+                    <div class="proto-desc">6 大核心模块：Manager 办公桌、办公楼平面图、Task Graph、时间线、格子间抽屉、团队邮箱</div>
+                    <div class="proto-link">打开原型 →</div>
+                </a>
+                <a href="hive-creator-onboarding.html" class="proto-card" target="_blank">
+                    <div class="proto-icon">🎨</div>
+                    <div class="proto-title">创作者中心</div>
+                    <div class="proto-desc">9 个核心页面，含三级账号等级 FREE/PRO/MAX 商业化设计</div>
+                    <div class="proto-link">打开原型 →</div>
+                </a>
+                <a href="hive-profile-design.html" class="proto-card" target="_blank">
+                    <div class="proto-icon">👤</div>
+                    <div class="proto-title">个人中心 Profile</div>
+                    <div class="proto-desc">用户与创作者双角色体系，支持角色切换与权限隔离</div>
+                    <div class="proto-link">打开原型 →</div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="videos">
+        <div class="section-header">
+            <div class="section-label">Demo Videos</div>
+            <h2 class="section-title">演示视频</h2>
+            <p class="section-desc">录制的产品演示视频，覆盖工作页面、个人中心、创作者平台、文件管理器等核心功能。</p>
+        </div>
+
+        <div class="video-grid">
+            <div class="video-item">
+                <video controls preload="metadata" poster="assets/screenshots/深色模式_工作页面v2.png">
+                    <source src="assets/videos/全流程演示视频.mp4" type="video/mp4">
+                </video>
+                <div class="video-caption">全流程演示视频</div>
+            </div>
+            <div class="video-item">
+                <video controls preload="metadata" poster="assets/screenshots/深色模式_工作页面v2.png">
+                    <source src="assets/videos/工作页面展示视频_v2.mp4" type="video/mp4">
+                </video>
+                <div class="video-caption">工作页面展示</div>
+            </div>
+            <div class="video-item">
+                <video controls preload="metadata" poster="assets/screenshots/深色模式_工作页面v2.png">
+                    <source src="assets/videos/工作页面录屏演示.mp4" type="video/mp4">
+                </video>
+                <div class="video-caption">工作页面录屏演示</div>
+            </div>
+            <div class="video-item">
+                <video controls preload="metadata" poster="assets/screenshots/深色模式_工作页面v2.png">
+                    <source src="assets/videos/工作页面下抽屉.mp4" type="video/mp4">
+                </video>
+                <div class="video-caption">工作页面下抽屉</div>
+            </div>
+            <div class="video-item">
+                <video controls preload="metadata" poster="assets/screenshots/深色模式_个人中心.png">
+                    <source src="assets/videos/个人中心.mp4" type="video/mp4">
+                </video>
+                <div class="video-caption">个人中心</div>
+            </div>
+            <div class="video-item">
+                <video controls preload="metadata" poster="assets/screenshots/深色模式_工作页面v2.png">
+                    <source src="assets/videos/文件管理器演示.mp4" type="video/mp4">
+                </video>
+                <div class="video-caption">文件管理器演示</div>
+            </div>
+            <div class="video-item">
+                <video controls preload="metadata" poster="assets/screenshots/深色模式_工作页面v2.png">
+                    <source src="assets/videos/skill创作者平台.mp4" type="video/mp4">
+                </video>
+                <div class="video-caption">Skill 创作者平台</div>
+            </div>
+            <div class="video-item">
+                <video controls preload="metadata" poster="assets/screenshots/深色模式_工作页面v2.png">
+                    <source src="assets/videos/bp背景剪辑平台演示视频.mp4" type="video/mp4">
+                </video>
+                <div class="video-caption">BP 背景剪辑平台</div>
+            </div>
+            <div class="video-item">
+                <video controls preload="metadata" poster="assets/screenshots/深色模式_工作页面v2.png">
+                    <source src="assets/videos/工作页面_v1.mp4" type="video/mp4">
+                </video>
+                <div class="video-caption">工作页面 v1</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills" style="background: var(--bg-card); margin: 0; max-width: none; padding-left: 40px; padding-right: 40px;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <div class="section-header">
+                <div class="section-label">Skills</div>
+                <h2 class="section-title">专业技能与工具</h2>
+            </div>
+
+            <div class="skills-grid">
+                <span class="skill-tag">产品规划</span>
+                <span class="skill-tag">PRD 撰写</span>
+                <span class="skill-tag">业务流程设计</span>
+                <span class="skill-tag">数据埋点</span>
+                <span class="skill-tag">竞品分析</span>
+                <span class="skill-tag">UI/UX 设计</span>
+                <span class="skill-tag">Figma</span>
+                <span class="skill-tag">Claude Code</span>
+                <span class="skill-tag">Kimi</span>
+                <span class="skill-tag">Marvis</span>
+                <span class="skill-tag">Qoder</span>
+                <span class="skill-tag">MiniMax</span>
+                <span class="skill-tag">HTML/CSS 原型</span>
+                <span class="skill-tag">Design Tokens</span>
+                <span class="skill-tag">Python</span>
+                <span class="skill-tag">PyTorch</span>
+                <span class="skill-tag">YOLOv5</span>
+                <span class="skill-tag">CNN</span>
+                <span class="skill-tag">OpenCV</span>
+                <span class="skill-tag">项目管理</span>
+            </div>
         </div>
     </section>
 
     <footer>
-        <p>使用 Claude Code + Figma 构建 · 从需求到原型的全链路设计能力</p>
+        <p>使用 Figma + Claude Code 构建 · 从需求到原型的全链路设计能力</p>
+        <p style="margin-top: 8px;">不参加外包项目，谢谢。</p>
     </footer>
+
+    <div class="lightbox" id="lightbox">
+        <span class="lightbox-close" onclick="closeLightbox()">&times;</span>
+        <img src="" alt="Preview" id="lightbox-img">
+    </div>
+
+    <script>
+        document.querySelectorAll('.zoomable').forEach(img => {
+            img.addEventListener('click', function() {
+                document.getElementById('lightbox-img').src = this.src;
+                document.getElementById('lightbox').classList.add('active');
+            });
+        });
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+
+        document.getElementById('lightbox').addEventListener('click', function(e) {
+            if (e.target === this) closeLightbox();
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeLightbox();
+        });
+    </script>
 
 </body>
 </html>
